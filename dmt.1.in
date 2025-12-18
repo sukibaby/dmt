@@ -1,0 +1,59 @@
+.TH DMT 1 "@BUILD_DATE@" "dmt @PROJECT_VERSION@" "User Commands"
+.SH NAME
+dmt \- Debian Mirror Tester
+.SH SYNOPSIS
+.B dmt
+[\fIOPTIONS\fR]
+.SH DESCRIPTION
+Measure the download speed and latency of various Debian mirrors.
+.B dmt
+provides an easy way to determine which mirrors are most optimal at your location.
+.SH OPTIONS
+.TP
+.B \-\-country \fICODE\fR
+Filter mirrors by ISO 3166-1 alpha-2 country code (e.g., US, GB, FR).
+Only tests mirrors located in the specified country.
+.TP
+.B \-\-no\-official\-mirrors
+Exclude debian.org mirrors from testing. Tests only community mirrors.
+.TP
+.B \-\-only\-official\-mirrors
+Test only official debian.org mirrors. Ignores community mirrors.
+Can be combined with
+.B \-\-country
+to test official mirrors in a specific country.
+.TP
+.B \-\-count \fINUMBER\fR
+Number of top results to display for latency and speed rankings.
+Default is 5 results.
+.TP
+.B \-\-timeout \fIMILLISECONDS\fR
+Set the timeout for individual mirror requests, in milliseconds.
+Default is 10 seconds (10000 ms).
+.TP
+.B \-\-help
+Display the help message and exit.
+.SH EXAMPLES
+Test all mirrors and show top 5 fastest:
+.IP
+dmt
+.PP
+Test only mirrors in France:
+.IP
+dmt \-\-country FR
+.PP
+Test only official Debian mirrors in Germany:
+.IP
+dmt \-\-only\-official\-mirrors \-\-country DE
+.PP
+Test community mirrors and show top 10 results:
+.IP
+dmt \-\-no\-official\-mirrors \-\-count 10
+.PP
+Test with a custom timeout of 5 seconds:
+.IP
+dmt \-\-timeout 5000
+.SH AUTHOR
+sukibaby (GitHub)
+.SH COPYRIGHT
+This project is licensed under the MIT license.

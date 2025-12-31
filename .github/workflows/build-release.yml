@@ -1,0 +1,51 @@
+# Provide a trusted build of DMT as efficiently and quickly as possible.
+# Minimizing energy usage / resource consumption is my main priority at
+# this time, so I'm only building for x86_64 Linux for now.
+
+name: DMT workflow auto-release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build_and_release:
+    name: Build & Release
+    runs-on: ubuntu-slim
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libcurl4-openssl-dev ca-certificates
+
+      - name: Build x86_64 Linux binary
+        run: |
+          mkdir -p build/x86_64 artifacts
+          cd build/x86_64
+          cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DWITH_CPACK=ON \
+            -DCMAKE_SYSTEM_PROCESSOR=x86_64 \
+            ../..
+          cmake --build . --config Release
+          cp dmt ../../artifacts/dmt-linux-x86_64
+
+      - name: List artifacts
+        run: ls -lh artifacts/
+
+      - name: Create GitHub Release and upload assets
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: release-${{ github.run_number }}-${{ github.sha }}
+          name: Release ${{ github.run_number }}
+          files: artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

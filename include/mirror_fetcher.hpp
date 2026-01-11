@@ -19,7 +19,4 @@ class MirrorFetcher
 };
 
 extern const std::array<CountryCode, 80> CountryCodes;
-
-// Official Debian mirrors. these urls are static and do not need to be fetched
-// from the web.
 extern const std::array<OfficialMirror, 35> OfficialMirrors;

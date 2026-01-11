@@ -46,7 +46,6 @@ class PerformanceTester
     static PerformanceResult testMirror(const DebianMirror &Mirror);
     static std::vector<PerformanceResult> testAllMirrors(const std::vector<DebianMirror> &Mirrors);
 
-    // Initialized to 15 seconds, or 15000 milliseconds
     inline static std::atomic<long> RequestTimeoutMs{DefaultTimeoutMs};
 
   private:

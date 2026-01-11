@@ -58,8 +58,7 @@ std::vector<DebianMirror> MirrorFetcher::fetchMirrors()
 }
 
 // Parse Debian mirror-listing HTML and extract mirrors (URL + country).
-// Associates country headers with nearby URLs, filters for "/debian", and
-// de-duplicates.
+// Associates country headers with nearby URLs, filters for "/debian", and de-duplicates.
 std::vector<DebianMirror> MirrorFetcher::parseHtmlMirrorList(std::string_view Html)
 {
     std::vector<DebianMirror> Mirrors;
@@ -78,9 +77,7 @@ std::vector<DebianMirror> MirrorFetcher::parseHtmlMirrorList(std::string_view Ht
     std::cregex_iterator CountryIt(Html.data(), Html.data() + Html.size(), CountryRegex);
     std::cregex_iterator CountryEnd;
 
-    // Build a map of position -> country name
-    // The size_t is the position in the HTML string, and the std::string is the
-    // country name
+    // Build a map of position -> country name. The size_t is the position in the HTML string.
     std::vector<std::pair<size_t, std::string>> CountryPositions;
     while (CountryIt != CountryEnd)
     {

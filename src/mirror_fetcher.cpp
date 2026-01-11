@@ -60,7 +60,7 @@ std::vector<DebianMirror> MirrorFetcher::fetchMirrors()
 // Parse Debian mirror-listing HTML and extract mirrors (URL + country).
 // Associates country headers with nearby URLs, filters for "/debian", and
 // de-duplicates.
-std::vector<DebianMirror> MirrorFetcher::parseHtmlMirrorList(const std::string &Html)
+std::vector<DebianMirror> MirrorFetcher::parseHtmlMirrorList(std::string_view Html)
 {
     std::vector<DebianMirror> Mirrors;
     std::string LastCountry = "Unknown";
@@ -73,10 +73,10 @@ std::vector<DebianMirror> MirrorFetcher::parseHtmlMirrorList(const std::string &
                                   "[a-z]+)*)</(?:h[2-3]|strong|b)>";
     std::regex CountryRegex(country_pattern);
 
-    std::sregex_iterator UrlIt(Html.begin(), Html.end(), UrlPattern);
-    std::sregex_iterator UrlEnd;
-    std::sregex_iterator CountryIt(Html.begin(), Html.end(), CountryRegex);
-    std::sregex_iterator CountryEnd;
+    std::cregex_iterator UrlIt(Html.data(), Html.data() + Html.size(), UrlPattern);
+    std::cregex_iterator UrlEnd;
+    std::cregex_iterator CountryIt(Html.data(), Html.data() + Html.size(), CountryRegex);
+    std::cregex_iterator CountryEnd;
 
     // Build a map of position -> country name
     // The size_t is the position in the HTML string, and the std::string is the
@@ -89,10 +89,10 @@ std::vector<DebianMirror> MirrorFetcher::parseHtmlMirrorList(const std::string &
     }
 
     // Process each URL
-    UrlIt = std::sregex_iterator(Html.begin(), Html.end(), UrlPattern);
+    UrlIt = std::cregex_iterator(Html.data(), Html.data() + Html.size(), UrlPattern);
     while (UrlIt != UrlEnd)
     {
-        std::smatch Match = *UrlIt;
+        auto Match = *UrlIt;
         std::string Url = Match[1].str();
         size_t UrlPos = Match.position(0);
 

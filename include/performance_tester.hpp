@@ -40,11 +40,14 @@ struct PerformanceResult
 class PerformanceTester
 {
   public:
+    // Default request timeout in milliseconds: 15 seconds
+    static constexpr long DefaultTimeoutMs = 15000;
+
     static PerformanceResult testMirror(const DebianMirror &Mirror);
     static std::vector<PerformanceResult> testAllMirrors(const std::vector<DebianMirror> &Mirrors);
 
     // Initialized to 15 seconds, or 15000 milliseconds
-    inline static std::atomic<long> RequestTimeoutMs{15000};
+    inline static std::atomic<long> RequestTimeoutMs{DefaultTimeoutMs};
 
   private:
     // ls-lR.gz is universally available on Debian mirrors, and is a

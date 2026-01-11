@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
         }
         else if (Arg == "--help")
         {
-            std::cout << HelpText;
+            std::cout << getHelpText();
             return 0;
         }
         else if (Arg == "--timeout" && i + 1 < argc)

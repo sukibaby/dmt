@@ -7,7 +7,11 @@ dmt \- Debian Mirror Tester
 .SH DESCRIPTION
 Measure the download speed and latency of various Debian mirrors.
 .B dmt
-provides an easy way to determine which mirrors are most optimal at your location.
+provides an easy way to determine which mirrors are most optimal for your connection.
+It reads the Debian official mirror list to build a set of valid servers, and filters
+them based on user-provided options if necessary. After testing, it will show a ranking
+of the fastest mirrors based on time to start transfer, as well as a ranking of the fastest
+mirrors based on download speed. By default, 5 results are shown.
 .SH OPTIONS
 .TP
 .B \-\-country \fICODE\fR
@@ -29,7 +33,7 @@ Default is 5 results.
 .TP
 .B \-\-timeout \fIMILLISECONDS\fR
 Set the timeout for individual mirror requests, in milliseconds.
-Default is 10 seconds (10000 ms).
+Default is 60 seconds (60000 ms).
 .TP
 .B \-\-help
 Display the help message and exit.
@@ -56,4 +60,5 @@ dmt \-\-timeout 5000
 .SH AUTHOR
 sukibaby (GitHub)
 .SH COPYRIGHT
-This project is licensed under the MIT license.
+This project, dmt, is licensed under the MIT license.
+dmt uses libcurl (https://curl.se/libcurl/).

@@ -12,6 +12,8 @@ namespace
 constexpr std::size_t CountryCodeLengthLimit = 2;
 } // namespace
 
+// Input: raw country code (any case).
+// Output: normalized country code (uppercase), or empty string if invalid.
 std::string normalizeCountryCode(std::string_view raw)
 {
     if (raw.size() < CountryCodeLengthLimit)
@@ -35,6 +37,8 @@ std::string normalizeCountryCode(std::string_view raw)
     return out;
 }
 
+// Input: country code (ISO 3166-1 alpha-2, uppercase or lowercase).
+// Output: country name, or empty string if not found.
 std::string countryCodeToName(std::string_view code)
 {
     if (code.size() != CountryCodeLengthLimit)

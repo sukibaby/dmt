@@ -1,4 +1,3 @@
-#include "main.hpp"
 #include "country.hpp"
 #include "mirror_fetcher.hpp"
 #include "performance_tester.hpp"

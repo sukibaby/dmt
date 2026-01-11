@@ -40,8 +40,12 @@ struct PerformanceResult
 class PerformanceTester
 {
   public:
-    // Default request timeout in milliseconds: 15 seconds
-    static constexpr long DefaultTimeoutMs = 15000;
+    // Default timeout set to 1 minute, represented as milliseconds.
+    // Most requests won't take anywhere near this long, but I don't
+    // want to cause avoidable failures on slow or distant mirrors,
+    // or for users with slow / unreliable connections. People can
+    // always set a different value with the --timeout option.
+    static constexpr long DefaultTimeoutMs = 60000;
 
     static PerformanceResult testMirror(const DebianMirror &Mirror);
     static std::vector<PerformanceResult> testAllMirrors(const std::vector<DebianMirror> &Mirrors);

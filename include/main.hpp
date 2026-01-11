@@ -4,8 +4,6 @@
 #include <string>
 #include "performance_tester.hpp"
 
-constexpr long default_timeout = PerformanceTester::DefaultTimeoutMs;
-
 inline std::string getHelpText()
 {
     std::ostringstream Out;
@@ -14,7 +12,7 @@ inline std::string getHelpText()
   --only-official-mirrors       Only test debian.org mirrors
   --count <number>              Number of top results to display. Default is 5.
   --timeout <milliseconds>      How long to wait before giving up on each mirror. Default is )";
-    Out << (static_cast<double>(default_timeout) / 1000.0) << " seconds (" << default_timeout << ").\n";
+    Out << (static_cast<double>(PerformanceTester::DefaultTimeoutMs) / 1000.0) << " seconds (" << PerformanceTester::DefaultTimeoutMs << ").\n";
     Out << R"(  --help                        This help message!
 )" ;
     return Out.str();

@@ -12,10 +12,6 @@
 #include <string>
 #include <vector>
 
-// Default number of top mirrors to display when printing results. May be
-// overridden by --count.
-constexpr int DefaultNumTopEntries = 5;
-
 namespace
 {
 bool compareByLatency(const PerformanceResult &A, const PerformanceResult &B)
@@ -125,7 +121,7 @@ int main(int argc, char *argv[])
     bool CountrySpecified = false;
     bool ExcludeOfficial = false;
     bool OnlyOfficial = false;
-    int TopCount = DefaultNumTopEntries;
+    int TopCount = 5; // default number of "Top" results to display
 
     // Check argument size before parsing
     constexpr int MaxArgs = 4096;

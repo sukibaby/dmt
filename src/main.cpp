@@ -156,12 +156,12 @@ int main(int argc, char *argv[])
         }
         else if (Arg == "--count" && i + 1 < argc)
         {
-            int Parsed = 0;
-            if (!parsePositiveUInt16(argv[++i], Parsed, std::cerr))
+            int ParsedCount = 0;
+            if (!parsePositiveUInt16(argv[++i], ParsedCount, std::cerr))
             {
                 return 1;
             }
-            TopCount = Parsed;
+            TopCount = ParsedCount;
         }
         else if (Arg == "--help")
         {
@@ -170,21 +170,21 @@ int main(int argc, char *argv[])
         }
         else if (Arg == "--timeout" && i + 1 < argc)
         {
-            int Parsed = 0;
-            if (!parsePositiveUInt16(argv[++i], Parsed, std::cerr))
+            int ParsedTimeout = 0;
+            if (!parsePositiveUInt16(argv[++i], ParsedTimeout, std::cerr))
             {
                 return 1;
             }
-            PerformanceTester::RequestTimeoutMs.store(static_cast<long>(Parsed));
+            PerformanceTester::RequestTimeoutMs.store(static_cast<long>(ParsedTimeout));
 
-            if (Parsed < 1000)
+            if (ParsedTimeout < 1000)
             {
                 std::cerr << "WARNING: a timeout of less than 1 second is not "
                              "recommended.\n\n";
             }
 
-            const float TimeoutSeconds = static_cast<float>(Parsed) / 1000.0f;
-            std::cout << "Using request timeout of " << TimeoutSeconds << " seconds (" << Parsed << " ms)\n";
+            const float TimeoutSeconds = static_cast<float>(ParsedTimeout) / 1000.0f;
+            std::cout << "Using request timeout of " << TimeoutSeconds << " seconds (" << ParsedTimeout << " ms)\n";
         }
     }
 

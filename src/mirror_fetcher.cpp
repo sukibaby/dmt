@@ -132,25 +132,25 @@ std::vector<DebianMirror> MirrorFetcher::parseHtmlMirrorList(const std::string &
 // Strips an optional scheme ("http://" or "https://") and returns characters up
 // to the next '/'. Returns an empty string when the input is empty or does not
 // contain a hostname.
-std::string MirrorFetcher::extractHostname(const std::string &Url)
+std::string MirrorFetcher::extractHostname(std::string_view Url)
 {
     size_t Start = Url.find("://");
-    if (Start != std::string::npos)
+    if (Start != std::string_view::npos)
         Start += 3;
     else
         Start = 0;
 
     size_t End = Url.find('/', Start);
-    if (End == std::string::npos)
+    if (End == std::string_view::npos)
         End = Url.length();
 
-    return Url.substr(Start, End - Start);
+    return std::string(Url.substr(Start, End - Start));
 }
 
 // Return a vector containing official mirrors.
 // If CountryName is provided, returns mirrors for that country only.
 // If CountryName is empty, returns all official mirrors.
-std::vector<DebianMirror> MirrorFetcher::getOfficialMirrors(const std::string &CountryName)
+std::vector<DebianMirror> MirrorFetcher::getOfficialMirrors(std::string_view CountryName)
 {
     std::vector<DebianMirror> Mirrors;
 

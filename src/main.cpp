@@ -187,11 +187,8 @@ int main(int argc, char *argv[])
             }
             PerformanceTester::RequestTimeoutMs.store(static_cast<long>(ParsedTimeout));
 
-            if (ParsedTimeout < 1000)
-            {
-                std::cerr << "WARNING: a timeout of less than 1 second is not "
-                             "recommended.\n\n";
-            }
+            if (TimeoutArgs < 1000)
+                std::cerr << "WARNING: a timeout of less than 1 second is not recommended.\n\n";
 
             const float TimeoutSeconds = static_cast<float>(ParsedTimeout) / 1000.0f;
             std::cout << "Using request timeout of " << TimeoutSeconds << " seconds (" << ParsedTimeout << " ms)\n";
@@ -201,8 +198,7 @@ int main(int argc, char *argv[])
     // Validate that --country was given a valid code
     if (CountrySpecified && Location.empty())
     {
-        std::cerr << "Error: --country requires a valid ISO 3166-1 alpha-2 "
-                     "country code\n";
+        std::cerr << "Error: --country requires a valid ISO 3166-1 alpha-2 country code\n";
         return 1;
     }
 

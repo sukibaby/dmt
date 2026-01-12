@@ -17,9 +17,7 @@ constexpr std::size_t CountryCodeLengthLimit = 2;
 std::string normalizeCountryCode(std::string_view raw)
 {
     if (raw.size() < CountryCodeLengthLimit)
-    {
         return "";
-    }
 
     std::string out;
     out.reserve(CountryCodeLengthLimit);
@@ -28,9 +26,7 @@ std::string normalizeCountryCode(std::string_view raw)
     {
         unsigned char uc = static_cast<unsigned char>(raw[i]);
         if (!std::isalpha(uc))
-        {
             return "";
-        }
         out.push_back(static_cast<char>(std::toupper(uc)));
     }
 
@@ -42,9 +38,7 @@ std::string normalizeCountryCode(std::string_view raw)
 std::string countryCodeToName(std::string_view code)
 {
     if (code.size() != CountryCodeLengthLimit)
-    {
         return "";
-    }
 
     std::string codeUpper;
     codeUpper.reserve(CountryCodeLengthLimit);
@@ -53,18 +47,14 @@ std::string countryCodeToName(std::string_view code)
     {
         unsigned char uc = static_cast<unsigned char>(code[i]);
         if (!std::isalpha(uc))
-        {
             return "";
-        }
         codeUpper.push_back(static_cast<char>(std::toupper(uc)));
     }
 
     for (const auto &entry : CountryCodes)
     {
         if (cc_code(entry) == codeUpper)
-        {
             return std::string(cc_name(entry));
-        }
     }
 
     return "";

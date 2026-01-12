@@ -2,12 +2,14 @@
 #include "mirror_fetcher.hpp"
 #include "performance_tester.hpp"
 #include <algorithm>
+#include <charconv>
 #include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <cstring>
 #include <string>
 #include <vector>
 #include <sstream>
@@ -24,25 +26,23 @@ bool compareBySpeed(const PerformanceResult &A, const PerformanceResult &B)
     return A.DownloadSpeedMbps > B.DownloadSpeedMbps;
 }
 
-bool parsePositiveUInt16(const char *Value, int &Parsed, std::ostream &Err)
+bool parseClampedIntArg(const char *OptionName, int Min, int Max, const char *ArgValue, int &Out)
 {
-    Parsed = 0;
-    char *EndPtr = nullptr;
-    long ParsedLong = std::strtol(Value, &EndPtr, 10);
+    int Parsed = 0;
+    auto [Ptr, Ec] = std::from_chars(ArgValue, ArgValue + std::strlen(ArgValue), Parsed);
 
-    if (EndPtr == Value || *EndPtr != '\0')
+    if (Ec == std::errc::invalid_argument || Ec == std::errc::result_out_of_range)
     {
-        Err << "Value must be a valid integer!\n";
+        std::cerr << "Error: " << OptionName << " value is out of range.\n";
         return false;
     }
 
-    Parsed = static_cast<int>(ParsedLong);
-    if (Parsed <= 0 || Parsed > static_cast<int>(std::numeric_limits<std::uint16_t>::max()))
+    if (Parsed < Min || Parsed > Max)
     {
-        Err << "Value must be between 1 and 65535!\n";
         return false;
     }
 
+    Out = Parsed;
     return true;
 }
 
@@ -136,6 +136,8 @@ int main(int argc, char *argv[])
     bool ExcludeOfficial = false;
     bool OnlyOfficial = false;
     int TopCount = 5; // default number of "Top" results to display
+    constexpr int MaxTopCount = 300;
+    constexpr int MaxTimeoutMs = 3600000; // 1 hour in milliseconds
 
     // Check argument size before parsing
     constexpr int MaxArgs = 4096;
@@ -166,12 +168,11 @@ int main(int argc, char *argv[])
         }
         else if (Arg == "--count" && i + 1 < argc)
         {
-            int ParsedCount = 0;
-            if (!parsePositiveUInt16(argv[++i], ParsedCount, std::cerr))
-            {
+            const char *NextArg = argv[++i];
+            int CountArgs = 0;
+            if (!parseClampedIntArg("--count", 1, MaxTopCount, NextArg, CountArgs))
                 return 1;
-            }
-            TopCount = ParsedCount;
+            TopCount = CountArgs;
         }
         else if (Arg == "--help")
         {
@@ -180,18 +181,18 @@ int main(int argc, char *argv[])
         }
         else if (Arg == "--timeout" && i + 1 < argc)
         {
-            int ParsedTimeout = 0;
-            if (!parsePositiveUInt16(argv[++i], ParsedTimeout, std::cerr))
-            {
+            const char *NextArg = argv[++i];
+            int TimeoutArgs = 0;
+
+            if (!parseClampedIntArg("--timeout", 0, MaxTimeoutMs, NextArg, TimeoutArgs))
                 return 1;
-            }
-            PerformanceTester::RequestTimeoutMs.store(static_cast<long>(ParsedTimeout));
+            PerformanceTester::RequestTimeoutMs.store(static_cast<long>(TimeoutArgs));
 
             if (TimeoutArgs < 1000)
                 std::cerr << "WARNING: a timeout of less than 1 second is not recommended.\n\n";
 
-            const float TimeoutSeconds = static_cast<float>(ParsedTimeout) / 1000.0f;
-            std::cout << "Using request timeout of " << TimeoutSeconds << " seconds (" << ParsedTimeout << " ms)\n";
+            const float TimeoutSeconds = static_cast<float>(TimeoutArgs) / 1000.0f;
+            std::cout << "Using request timeout of " << TimeoutSeconds << " seconds (" << TimeoutArgs << " ms)\n";
         }
     }
 

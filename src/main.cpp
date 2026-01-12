@@ -103,7 +103,6 @@ inline void printTopResults(std::ostream &Out, const std::vector<T> &Source, int
 std::vector<DebianMirror> filterMirrors(const std::vector<DebianMirror> &Mirrors, bool ExcludeOfficial,
                                         bool OnlyOfficial, const std::string &Location)
 {
-
     std::vector<DebianMirror> Filtered;
     Filtered.reserve(Mirrors.size());
     std::string TargetCountry = dmt::countryCodeToName(Location);

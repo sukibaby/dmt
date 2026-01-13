@@ -26,9 +26,9 @@ std::vector<DebianMirror> MirrorFetcher::fetchMirrors()
     }
 
     std::string Response;
-    const char *Urls[] = {"https://www.debian.org/mirror/list", "https://www.debian.org/mirror/mirrors_full",
+    constexpr const char *Urls[] = {"https://www.debian.org/mirror/list", "https://www.debian.org/mirror/mirrors_full",
                           "https://www.debian.org/mirror/official"};
-    const int NumUrls = sizeof(Urls) / sizeof(Urls[0]);
+    constexpr size_t NumUrls = sizeof(Urls) / sizeof(Urls[0]);
 
     curl_easy_setopt(Curl, CURLOPT_WRITEFUNCTION, writeCallback);
     curl_easy_setopt(Curl, CURLOPT_WRITEDATA, &Response);
@@ -36,7 +36,7 @@ std::vector<DebianMirror> MirrorFetcher::fetchMirrors()
     curl_easy_setopt(Curl, CURLOPT_FOLLOWLOCATION, 1L);
 
     CURLcode Res = CURLE_OK;
-    for (int Idx = 0; Idx < NumUrls; ++Idx)
+    for (size_t Idx = 0; Idx < NumUrls; ++Idx)
     {
         Response.clear();
         curl_easy_setopt(Curl, CURLOPT_URL, Urls[Idx]);

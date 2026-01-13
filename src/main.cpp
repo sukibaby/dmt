@@ -26,22 +26,32 @@ bool compareBySpeed(const PerformanceResult &A, const PerformanceResult &B)
     return A.DownloadSpeedMbps > B.DownloadSpeedMbps;
 }
 
-bool parseClampedIntArg(const char *OptionName, int Min, int Max, const char *ArgValue, int &Out)
+int myStoi(const char *flag, int limit, const char *ia)
 {
-    int Parsed = 0;
-    auto [Ptr, Ec] = std::from_chars(ArgValue, ArgValue + std::strlen(ArgValue), Parsed);
+    int_least64_t ret; // if some architecture really has weird int sizes, then let it rock baby
+    auto [endpointer, errorcode] = std::from_chars(ia, ia + std::strlen(ia), ret);
 
-    if (Ec == std::errc::invalid_argument || Ec == std::errc::result_out_of_range)
+    if (errorcode == std::errc::invalid_argument)
     {
-        std::cerr << "Error: " << OptionName << " value is out of range.\n";
-        return false;
+        std::cerr << "Error: " << flag << " value is out of range.\n";
+        std::exit(EXIT_FAILURE);
     }
 
-    if (Parsed < Min || Parsed > Max)
-        return false;
+    // Assuming the user intentionally meant "as large as possible", just clamp to max int.
+    // (this is presumably to disable timeouts or show all results in the final ranking)
+    if (errorcode == std::errc::result_out_of_range)
+        return std::numeric_limits<int>::max();
 
-    Out = Parsed;
-    return true;
+    if (ret < 0)
+    {
+        std::cerr << "Error: " << flag << " value cannot be negative.\n";
+        std::exit(EXIT_FAILURE);
+    }
+
+    if (ret > limit)
+        return limit;
+
+    return static_cast<int>(ret);
 }
 
 std::string howdy()
@@ -134,7 +144,6 @@ int main(int argc, char *argv[])
     bool ExcludeOfficial = false;
     bool OnlyOfficial = false;
     int TopCount = 5; // default number of "Top" results to display
-    constexpr int MaxTopCount = 300;
     constexpr int MaxTimeoutMs = 3600000; // 1 hour in milliseconds
 
     // Check argument size before parsing
@@ -166,11 +175,9 @@ int main(int argc, char *argv[])
         }
         else if (Arg == "--count" && i + 1 < argc)
         {
-            const char *NextArg = argv[++i];
-            int CountArgs = 0;
-            if (!parseClampedIntArg("--count", 1, MaxTopCount, NextArg, CountArgs))
-                return 1;
-            TopCount = CountArgs;
+            // We'll clamp this later after fetching mirrors. So for now, just parse/validate.
+            const char *countValueString = argv[++i];
+            TopCount = myStoi("--count", std::numeric_limits<int>::max(), countValueString);
         }
         else if (Arg == "--help")
         {
@@ -179,18 +186,36 @@ int main(int argc, char *argv[])
         }
         else if (Arg == "--timeout" && i + 1 < argc)
         {
-            const char *NextArg = argv[++i];
-            int TimeoutArgs = 0;
-
-            if (!parseClampedIntArg("--timeout", 0, MaxTimeoutMs, NextArg, TimeoutArgs))
-                return 1;
+            const char *timeoutValueString = argv[++i];
+            const int TimeoutArgs = myStoi("--timeout", MaxTimeoutMs, timeoutValueString);
             PerformanceTester::RequestTimeoutMs.store(static_cast<long>(TimeoutArgs));
 
             if (TimeoutArgs < 1000)
-                std::cerr << "WARNING: a timeout of less than 1 second is not recommended.\n\n";
-
-            const float TimeoutSeconds = static_cast<float>(TimeoutArgs) / 1000.0f;
-            std::cout << "Using request timeout of " << TimeoutSeconds << " seconds (" << TimeoutArgs << " ms)\n";
+            {
+                std::cerr << "\n!! WARNING: a timeout of less than 1 second is not recommended. !!\n";
+                std::cerr << "Did you definitely mean to do this? (y/n): ";
+                char Response;
+                std::cin >> Response;
+                if (Response != 'y' && Response != 'Y')
+                {
+                    std::exit(EXIT_FAILURE);
+                }
+                std::cerr << "\n";
+            }
+            else if (TimeoutArgs < 3000)
+            {
+                std::cout << "Note: A timeout of less than 3 seconds may lead to many mirrors being marked as unreachable.\n";
+            }
+            else if (TimeoutArgs == std::numeric_limits<int>::max())
+            {
+                // fun fact - INT_MAX is 2147483647, which is about 3.5 weeks. i wonder if curl will try to wait that long...
+                std::cout << "Request timeouts are disabled.\n";
+            }
+            else
+            {
+                const float TimeoutSeconds = static_cast<float>(TimeoutArgs) / 1000.0f;
+                std::cout << "Using request timeout of " << TimeoutSeconds << " seconds (" << TimeoutArgs << " ms)\n";
+            }
         }
     }
 
@@ -258,6 +283,15 @@ int main(int argc, char *argv[])
         Mirrors = filterMirrors(Mirrors, ExcludeOfficial, OnlyOfficial, Location);
         if (CountrySpecified || ExcludeOfficial)
             std::cout << "After filtering: " << Mirrors.size() << " mirrors.\n";
+    }
+
+    // Now that we know how many mirrors we have, ensure TopCount is not some larger value
+    if (static_cast<size_t>(TopCount) > Mirrors.size())
+    {
+        std::cout << "We were hoping to display " << TopCount << " mirrors, but I could only find " <<
+        Mirrors.size() << " suitable mirrors, so I'll provide a ranking of all " << Mirrors.size() <<
+        " after testing is complete.\n";
+        TopCount = static_cast<int>(Mirrors.size());
     }
 
     const auto StartTime = std::chrono::steady_clock::now();

@@ -64,7 +64,12 @@ double PerformanceTester::measureLatencyMs(const std::string &Url, std::string &
     CURLcode Res = curl_easy_perform(curl);
     const auto End = std::chrono::steady_clock::now();
 
-    IS_CURLE_OKAY
+    if (Res != CURLE_OK)
+    {
+        ErrorMessage = CURLcodeToString(Res, TimeoutMs);
+        curl_easy_cleanup(curl);
+        return -1.0;
+    }
 
     long HttpStatus = 0;
     if (curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &HttpStatus) == CURLE_OK)
@@ -108,7 +113,13 @@ double PerformanceTester::measureDownloadSpeedMbps(const std::string &Url, std::
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
 
     CURLcode Res = curl_easy_perform(curl);
-    IS_CURLE_OKAY
+
+    if (Res != CURLE_OK)
+    {
+        ErrorMessage = CURLcodeToString(Res, TimeoutMs);
+        curl_easy_cleanup(curl);
+        return -1.0;
+    }
 
     long HttpStatus = 0;
     if (curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &HttpStatus) == CURLE_OK)
@@ -129,20 +140,19 @@ double PerformanceTester::measureDownloadSpeedMbps(const std::string &Url, std::
         curl_easy_cleanup(curl);
         return static_cast<double>((AvgSpeedBytesPerSec) * 8.0) / (1024.0 * 1024.0);
     }
-    else
+
+    // Fallback: check if anything was actually downloaded.
+    // In 99% of failure cases, curl will give a clear error code.
+    // If we're here, we probably got caught in something like a
+    // JavaScript verification challenge that curl can't handle.
+    curl_off_t BytesDownloaded = 0;
+    curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD_T, &BytesDownloaded);
+    const long long SafeBytes = static_cast<long long>(std::max<curl_off_t>(0, BytesDownloaded));
+    if (SafeBytes == 0)
     {
-        // In 99% of failure cases, curl will give a clear error code.
-        // If we're here, we probably got caught in something like a
-        // JavaScript verification challenge that curl can't handle.
-        curl_off_t BytesDownloaded = 0;
-        curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD_T, &BytesDownloaded);
-        const long long SafeBytes = static_cast<long long>(std::max<curl_off_t>(0, BytesDownloaded));
-        if (SafeBytes == 0)
-        {
-            ErrorMessage = "Got a valid response, but couldn't download any data";
-            curl_easy_cleanup(curl);
-            return -1.0;
-        }
+        ErrorMessage = "Got a valid response, but couldn't download any data";
+        curl_easy_cleanup(curl);
+        return -1.0;
     }
 
     ErrorMessage = "Both speed and downloaded size reported as zero";

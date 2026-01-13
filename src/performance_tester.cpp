@@ -17,6 +17,22 @@ static size_t discardCallback(void *Contents, size_t Size, size_t NumMembers, vo
     return Size * NumMembers;
 }
 
+static std::string CURLcodeToString(CURLcode Res, long TimeoutMs = 0)
+{
+    if (Res == CURLE_OK)
+        return "";
+    if (Res == CURLE_COULDNT_RESOLVE_HOST)
+        return "DNS resolution failed";
+    if (Res == CURLE_OPERATION_TIMEDOUT)
+    {
+        // INT_MAX = disabled timeout (we'll let CURL handle timing out by itself instead of us doing it)
+        if (TimeoutMs == (long)std::numeric_limits<int>::max())
+            return "Timeout (declared by CURL)";
+        return "Timeout (" + std::to_string(TimeoutMs) + " ms)";
+    }
+    return std::string(curl_easy_strerror(Res));
+}
+
 // Measure request latency (HEAD) and return milliseconds or negative on
 // failure. Applies timeouts and converts common libcurl errors into readable
 // messages.

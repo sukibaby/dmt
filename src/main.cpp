@@ -31,7 +31,7 @@ int myStoi(const char *flag, const char *ia)
     int_least64_t ret; // if some architecture really has weird int sizes, then let it rock baby
     auto [endpointer, errorcode] = std::from_chars(ia, ia + std::strlen(ia), ret);
 
-    if (errorcode == std::errc::invalid_argument)
+    if (errorcode == std::errc::invalid_argument || ret == 0)
     {
         std::cerr << "Error: " << flag << " value is out of range.\n";
         std::exit(EXIT_FAILURE);
@@ -48,8 +48,8 @@ int myStoi(const char *flag, const char *ia)
         std::exit(EXIT_FAILURE);
     }
 
-    if (ret > limit)
-        return limit;
+    if (ret > std::numeric_limits<int>::max())
+        return std::numeric_limits<int>::max();
 
     return static_cast<int>(ret);
 }

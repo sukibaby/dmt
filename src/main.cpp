@@ -144,7 +144,6 @@ int main(int argc, char *argv[])
     bool ExcludeOfficial = false;
     bool OnlyOfficial = false;
     int TopCount = 5; // default number of "Top" results to display
-    constexpr int MaxTimeoutMs = 3600000; // 1 hour in milliseconds
 
     // Check argument size before parsing
     constexpr int MaxArgs = 4096;

@@ -60,7 +60,9 @@ Test with a custom timeout of 5 seconds:
 .IP
 dmt \-\-timeout 5000
 .SH AUTHOR
-sukibaby (GitHub)
+sukibaby
+.SH SEE ALSO
+https://github.com/sukibaby/dmt
 .SH COPYRIGHT
 This project, dmt, is licensed under the MIT license.
 dmt uses libcurl (https://curl.se/libcurl/).

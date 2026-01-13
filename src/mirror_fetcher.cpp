@@ -64,11 +64,11 @@ std::vector<DebianMirror> MirrorFetcher::parseHtmlMirrorList(std::string_view Ht
     std::vector<DebianMirror> Mirrors;
     std::string LastCountry = "Unknown";
 
-    const char *pattern = "href=\"(https?://[^\"]+)\"";
+    constexpr const char *pattern = "href=\"(https?://[^\"]+)\"";
     std::regex UrlPattern(pattern);
 
     // common patterns: <h2>CountryName</h2>, <strong>CountryName</strong>, etc
-    const char *country_pattern = "<(?:h[2-3]|strong|b)>([A-Z][a-z]+(?:\\s[A-Z]"
+    constexpr const char *country_pattern = "<(?:h[2-3]|strong|b)>([A-Z][a-z]+(?:\\s[A-Z]"
                                   "[a-z]+)*)</(?:h[2-3]|strong|b)>";
     std::regex CountryRegex(country_pattern);
 

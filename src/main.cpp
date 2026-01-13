@@ -44,7 +44,7 @@ bool parseClampedIntArg(const char *OptionName, int Min, int Max, const char *Ar
     return true;
 }
 
-std::string getHelpText()
+std::string howdy()
 {
     std::ostringstream Out;
     Out << R"(  --country <code>              Filter mirrors by country. Uses ISO 3166-1 alpha-2 country codes (such as FR, DE, US, CN, etc.)
@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
         }
         else if (Arg == "--help")
         {
-            std::cout << getHelpText();
+            std::cout << howdy();
             return 0;
         }
         else if (Arg == "--timeout" && i + 1 < argc)

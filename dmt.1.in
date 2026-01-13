@@ -30,10 +30,12 @@ to test official mirrors in a specific country.
 .B \-\-count \fINUMBER\fR
 Number of top results to display for latency and speed rankings.
 Default is 5 results.
+To disable this option (display all results), provide a very large number.
 .TP
 .B \-\-timeout \fIMILLISECONDS\fR
 Set the timeout for individual mirror requests, in milliseconds.
 Default is 60 seconds (60000 ms).
+To disable this option (wait indefinitely for a response), provide a very large number.
 .TP
 .B \-\-help
 Display the help message and exit.

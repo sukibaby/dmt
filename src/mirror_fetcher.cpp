@@ -44,7 +44,7 @@ std::vector<DebianMirror> MirrorFetcher::fetchMirrors()
         Res = curl_easy_perform(Curl);
         if (Res == CURLE_OK)
         {
-            std::cerr << "Successfully fetched mirrors from: " << Urls[Idx] << "\n";
+            std::cout << "Successfully fetched mirrors from: " << Urls[Idx] << "\n";
             curl_easy_cleanup(Curl);
             return parseHtmlMirrorList(Response);
         }

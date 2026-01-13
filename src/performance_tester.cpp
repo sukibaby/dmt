@@ -121,10 +121,18 @@ double PerformanceTester::measureDownloadSpeedMbps(const std::string &Url, std::
         BytesDownloaded = ActualDownloaded;
     }
 
+    curl_off_t AvgSpeedBytesPerSec = 0;
+    curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD_T, &AvgSpeedBytesPerSec);
+
     WRAP_UP_MEASURED_CURL_PERFORMANCE;
 
-    return bytesToMbps(static_cast<long long>(std::max<curl_off_t>(0, BytesDownloaded)),
-                       (Duration.count() / 1000.0)); // Convert ms to seconds
+    const double Seconds = std::max(1e-9, Duration.count() / 1000.0); // avoid divide-by-zero
+    const long long SafeBytes = static_cast<long long>(std::max<curl_off_t>(0, BytesDownloaded));
+
+    if (AvgSpeedBytesPerSec > 0)
+        return (static_cast<double>(AvgSpeedBytesPerSec) * 8.0) / (1024.0 * 1024.0);
+
+    return bytesToMbps(SafeBytes, Seconds);
 }
 
 // Test a mirror: measure latency and download speed.

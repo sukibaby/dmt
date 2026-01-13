@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-set(DMT_VERSION "0.1.4" CACHE STRING "Program version")
+set(DMT_VERSION "0.1.5" CACHE STRING "Program version")
 project(DebianMirrorTester VERSION ${DMT_VERSION} LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

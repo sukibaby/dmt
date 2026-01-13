@@ -294,11 +294,11 @@ int main(int argc, char *argv[])
                 ReachableResults.push_back(Result);
         }
 
-        // Top results by latency (lowest first)
+        // Top results by latency (fastest first, slowest last)
         printTopResults(std::cout, ReachableResults, TopCount, compareByLatency, "ranked by time to start transfer",
                         &PerformanceResult::TransferDelayMs, " ms");
 
-        // Top results by speed (highest first)
+        // Top results by speed (fastest first, slowest last)
         printTopResults(std::cout, ReachableResults, TopCount, compareBySpeed, "ranked by overall download speed",
                         &PerformanceResult::DownloadSpeedMbps, " Mbps");
     }

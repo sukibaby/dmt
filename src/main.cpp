@@ -249,6 +249,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    // Announce how many mirrors we parsed from the Debian mirror list
     std::cout << "Found " << Mirrors.size() << " mirrors.\n";
 
     // Apply filtering only if we fetched from the web (not using predefined official mirrors)

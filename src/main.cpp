@@ -192,8 +192,9 @@ int main(int argc, char *argv[])
 
             if (TimeoutArgs < 1000)
             {
-                std::cerr << "\n!! WARNING: a timeout of less than 1 second is not recommended. !!\n";
-                std::cerr << "Did you definitely mean to do this? (y/n): ";
+                std::cerr << "\nWARNING: a timeout of less than 1 second is not recommended.\n" <<
+                "As a reminder, --timeout takes a time value measured in milliseconds.\n" <<
+                "Did you definitely mean to run the program with such a short timeout? (y/n): ";
                 char Response;
                 std::cin >> Response;
                 if (Response != 'y' && Response != 'Y')

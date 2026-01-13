@@ -6,19 +6,6 @@
 #include <string>
 #include <vector>
 
-#define IS_CURLE_OKAY                                                                                                  \
-    if (Res != CURLE_OK)                                                                                               \
-    {                                                                                                                  \
-        if (Res == CURLE_COULDNT_RESOLVE_HOST)                                                                         \
-            ErrorMessage = "DNS resolution failed";                                                                    \
-        else if (Res == CURLE_OPERATION_TIMEDOUT)                                                                      \
-            ErrorMessage = "Time limit of " + std::to_string(TimeoutMs) + " ms reached - moving on";                   \
-        else                                                                                                           \
-            ErrorMessage = curl_easy_strerror(Res);                                                                    \
-        curl_easy_cleanup(curl);                                                                                       \
-        return -1.0;                                                                                                   \
-    }
-
 struct PerformanceResult
 {
     DebianMirror Mirror;

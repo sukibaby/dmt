@@ -26,10 +26,10 @@ bool compareBySpeed(const PerformanceResult &A, const PerformanceResult &B)
     return A.DownloadSpeedMbps > B.DownloadSpeedMbps;
 }
 
-int myStoi(const char *flag, const char *ia)
+int myStoi(const char *flag, const char *inputStr)
 {
-    auto [endpointer, errorcode] = std::from_chars(ia, ia + std::strlen(ia), ret);
     long long ret; // if some architecture really has weird int sizes, then let it rock baby
+    auto [endpointer, errorcode] = std::from_chars(inputStr, inputStr + std::strlen(inputStr), ret);
 
     // Assuming the user intentionally meant "as large as possible", just clamp to max int.
     // (this is presumably to disable timeouts or show all results in the final ranking)
@@ -49,7 +49,7 @@ int myStoi(const char *flag, const char *ia)
         std::exit(EXIT_FAILURE);
     }
 
-    if (ret > std::numeric_limits<int>::max())
+    if (ret > (long long)std::numeric_limits<int>::max())
         return std::numeric_limits<int>::max();
 
     return static_cast<int>(ret);

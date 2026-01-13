@@ -175,7 +175,7 @@ PerformanceResult PerformanceTester::testMirror(const DebianMirror &Mirror)
         if (result.IsReachable && result.DownloadSpeedMbps >= 0)
         {
             std::cout << " - Delay: " << std::fixed << std::setprecision(2) << result.TransferDelayMs << "ms, Speed: ";
-            if (result.DownloadSpeedMbps < 0.005)
+            if (result.DownloadSpeedMbps < 1.0)
                 std::cout << std::fixed << std::setprecision(2) << (result.DownloadSpeedMbps * 1000.0) << " Kbps\n";
             else
                 std::cout << std::fixed << std::setprecision(2) << result.DownloadSpeedMbps << " Mbps\n";

@@ -38,9 +38,7 @@ bool parseClampedIntArg(const char *OptionName, int Min, int Max, const char *Ar
     }
 
     if (Parsed < Min || Parsed > Max)
-    {
         return false;
-    }
 
     Out = Parsed;
     return true;
@@ -253,15 +251,12 @@ int main(int argc, char *argv[])
 
     std::cout << "Found " << Mirrors.size() << " mirrors.\n";
 
-    // Apply filtering only if we fetched from the web (not using predefined
-    // official mirrors)
+    // Apply filtering only if we fetched from the web (not using predefined official mirrors)
     if (!OnlyOfficial)
     {
         Mirrors = filterMirrors(Mirrors, ExcludeOfficial, OnlyOfficial, Location);
         if (CountrySpecified || ExcludeOfficial)
-        {
             std::cout << "After filtering: " << Mirrors.size() << " mirrors.\n";
-        }
     }
 
     const auto StartTime = std::chrono::steady_clock::now();
@@ -296,9 +291,7 @@ int main(int argc, char *argv[])
         for (const auto &Result : Results)
         {
             if (Result.IsReachable)
-            {
                 ReachableResults.push_back(Result);
-            }
         }
 
         // Top results by latency (lowest first)

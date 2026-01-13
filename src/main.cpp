@@ -67,7 +67,7 @@ inline void printTestingDuration(std::ostream &Out, std::chrono::steady_clock::t
     Out << "Testing complete. Took " << Duration.count() << " seconds.\n\n";
 }
 
-inline void printInitialResults(std::ostream &Out, std::size_t TotalTested, int Reachable)
+inline void printInitialResults(std::ostream &Out, size_t TotalTested, int Reachable)
 {
     const float PercentReachable =
         (TotalTested > 0) ? (static_cast<float>(Reachable) / static_cast<float>(TotalTested) * 100.0f) : 0.0f;
@@ -76,7 +76,7 @@ inline void printInitialResults(std::ostream &Out, std::size_t TotalTested, int 
     Out << "Summary:\n";
     Out << "  Total mirrors tested: " << TotalTested << "\n";
     Out << "  Reachable mirrors: " << Reachable << " (" << PercentReachable << "%)\n";
-    Out << "  Unreachable mirrors: " << (TotalTested - static_cast<std::size_t>(Reachable)) << " ("
+    Out << "  Unreachable mirrors: " << (TotalTested - static_cast<size_t>(Reachable)) << " ("
         << (100.0f - PercentReachable) << "%)\n";
 }
 
@@ -87,8 +87,8 @@ inline void printTopResults(std::ostream &Out, const std::vector<T> &Source, int
     std::vector<T> Temp = Source;
     std::sort(Temp.begin(), Temp.end(), Comp);
 
-    Out << "\n  Top " << static_cast<std::size_t>(TopCount) << " " << HeadingText << ":\n";
-    for (std::size_t Idx = 0; Idx < static_cast<std::size_t>(TopCount) && Idx < Temp.size(); ++Idx)
+    Out << "\n  Top " << static_cast<size_t>(TopCount) << " " << HeadingText << ":\n";
+    for (size_t Idx = 0; Idx < static_cast<size_t>(TopCount) && Idx < Temp.size(); ++Idx)
     {
         const auto &Item = Temp[Idx];
         Out << "    " << (Idx + 1) << ". " << dm_url(Item.Mirror) << " - " << std::fixed << std::setprecision(2)

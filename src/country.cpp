@@ -9,7 +9,7 @@ namespace dmt
 namespace
 {
 // Expected length (in characters) for ISO 3166-1 alpha-2 country codes.
-constexpr std::size_t CountryCodeLengthLimit = 2;
+constexpr size_t CountryCodeLengthLimit = 2;
 } // namespace
 
 // Input: raw country code (any case).
@@ -22,7 +22,7 @@ std::string normalizeCountryCode(std::string_view raw)
     std::string out;
     out.reserve(CountryCodeLengthLimit);
 
-    for (std::size_t i = 0; i < CountryCodeLengthLimit; ++i)
+    for (size_t i = 0; i < CountryCodeLengthLimit; ++i)
     {
         unsigned char uc = static_cast<unsigned char>(raw[i]);
         if (!std::isalpha(uc))
@@ -43,7 +43,7 @@ std::string countryCodeToName(std::string_view code)
     std::string codeUpper;
     codeUpper.reserve(CountryCodeLengthLimit);
 
-    for (std::size_t i = 0; i < CountryCodeLengthLimit; ++i)
+    for (size_t i = 0; i < CountryCodeLengthLimit; ++i)
     {
         unsigned char uc = static_cast<unsigned char>(code[i]);
         if (!std::isalpha(uc))

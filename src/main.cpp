@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
 
     int Reachable = 0;
     double AverageNetworkDelay = 0.0;
-    double AvgSpeed = 0.0;
+    double AverageSpeed = 0.0;
 
     for (const auto &Result : Results)
     {
@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
         {
             Reachable++;
             AverageNetworkDelay += Result.TransferDelayMs;
-            AvgSpeed += Result.DownloadSpeedMbps;
+            AverageSpeed += Result.DownloadSpeedMbps;
         }
     }
 
@@ -286,7 +286,7 @@ int main(int argc, char *argv[])
             (static_cast<float>(AverageNetworkDelay) / static_cast<float>(Reachable)) / 1000.0f;
         std::cout << "\n  Average time to start transfer: " << std::fixed << std::setprecision(2)
                   << AvgDelayInSeconds << " seconds\n";
-        std::cout << "  Average speed: " << std::fixed << std::setprecision(2) << (AvgSpeed / Reachable) << " Mbps\n";
+        std::cout << "  Average speed: " << std::fixed << std::setprecision(2) << (AverageSpeed / Reachable) << " Mbps\n";
 
         std::vector<PerformanceResult> ReachableResults;
         for (const auto &Result : Results)

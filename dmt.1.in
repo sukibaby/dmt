@@ -11,7 +11,10 @@ provides an easy way to determine which mirrors are most optimal for your connec
 It reads the Debian official mirror list to build a set of valid servers, and filters
 them based on user-provided options if necessary. After testing, it will show a ranking
 of the fastest mirrors based on time to start transfer, as well as a ranking of the fastest
-mirrors based on download speed. By default, 5 results are shown.
+mirrors based on download speed. 
+
+Results depend on many factors, and can be highly variable depending on your location, time
+of day, what your local ISP is doing, 
 .SH OPTIONS
 .TP
 .B \-\-country \fICODE\fR
@@ -65,4 +68,4 @@ sukibaby
 https://github.com/sukibaby/dmt
 .SH COPYRIGHT
 This project, dmt, is licensed under the MIT license.
-dmt uses libcurl (https://curl.se/libcurl/).
+dmt uses libcurl (https://curl.se/libcurl/). .PP

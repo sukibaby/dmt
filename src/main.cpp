@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
     printTestingDuration(std::cout, StartTime, EndTime);
 
     int Reachable = 0;
-    double AvgLatency = 0.0;
+    double AverageNetworkDelay = 0.0;
     double AvgSpeed = 0.0;
 
     for (const auto &Result : Results)
@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
         if (Result.IsReachable)
         {
             Reachable++;
-            AvgLatency += Result.LatencyMs;
+            AverageNetworkDelay += Result.TransferDelayMs;
             AvgSpeed += Result.DownloadSpeedMbps;
         }
     }
@@ -303,7 +303,7 @@ int main(int argc, char *argv[])
 
         // Top results by latency (lowest first)
         printTopResults(std::cout, ReachableResults, TopCount, compareByLatency, "ranked by time to start transfer",
-                        &PerformanceResult::LatencyMs, " ms");
+                        &PerformanceResult::TransferDelayMs, " ms");
 
         // Top results by speed (highest first)
         printTopResults(std::cout, ReachableResults, TopCount, compareBySpeed, "ranked by overall download speed",

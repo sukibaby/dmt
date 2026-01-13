@@ -31,7 +31,7 @@
 struct PerformanceResult
 {
     DebianMirror Mirror;
-    double LatencyMs;
+    double TransferDelayMs;
     double DownloadSpeedMbps;
     bool IsReachable;
     std::string ErrorMessage;

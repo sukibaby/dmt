@@ -141,8 +141,8 @@ PerformanceResult PerformanceTester::testMirror(const DebianMirror &Mirror)
     try
     {
         std::string LatencyError;
-        result.LatencyMs = measureLatencyMs(dm_url(Mirror), LatencyError);
-        if ((result.LatencyMs) < 0)
+        result.TransferDelayMs = measureLatencyMs(dm_url(Mirror), LatencyError);
+        if ((result.TransferDelayMs) < 0)
         {
             result.IsReachable = false;
             result.ErrorMessage = (LatencyError.empty() ? "Latency check failed" : LatencyError.c_str());
@@ -167,7 +167,7 @@ PerformanceResult PerformanceTester::testMirror(const DebianMirror &Mirror)
 
         if (result.IsReachable && result.DownloadSpeedMbps >= 0)
         {
-            std::cout << " - Latency: " << std::fixed << std::setprecision(2) << result.LatencyMs
+            std::cout << " - Delay: " << std::fixed << std::setprecision(2) << result.TransferDelayMs
                       << "ms, Speed: " << result.DownloadSpeedMbps << " Mbps\n";
         }
     }

@@ -31,16 +31,17 @@ int myStoi(const char *flag, const char *ia)
     int_least64_t ret; // if some architecture really has weird int sizes, then let it rock baby
     auto [endpointer, errorcode] = std::from_chars(ia, ia + std::strlen(ia), ret);
 
+    // Assuming the user intentionally meant "as large as possible", just clamp to max int.
+    // (this is presumably to disable timeouts or show all results in the final ranking)
+    // We need to check out_of_range first for consistency between compilers
+    if (errorcode == std::errc::result_out_of_range)
+        return std::numeric_limits<int>::max();
+
     if (errorcode == std::errc::invalid_argument || ret == 0)
     {
         std::cerr << "Error: " << flag << " value is out of range.\n";
         std::exit(EXIT_FAILURE);
     }
-
-    // Assuming the user intentionally meant "as large as possible", just clamp to max int.
-    // (this is presumably to disable timeouts or show all results in the final ranking)
-    if (errorcode == std::errc::result_out_of_range)
-        return std::numeric_limits<int>::max();
 
     if (ret < 0)
     {

@@ -8,13 +8,6 @@
 #include <iostream>
 #include <thread>
 
-// Convert bytes over seconds to megabits per second (Mbps).
-// Example: bytesToMbps(1048576, 1.0) -> 8.0
-static constexpr double bytesToMbps(long long Bytes, double Seconds) noexcept
-{
-    return (Seconds > 0.0) ? (static_cast<double>(Bytes) * 8.0) / (1024.0 * 1024.0) / Seconds : 0.0;
-}
-
 // libcurl write callback that discards received data.
 // Returns number of bytes processed (Size * NumMembers).
 static size_t discardCallback(void *Contents, size_t Size, size_t NumMembers, void *UserP)

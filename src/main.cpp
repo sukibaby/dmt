@@ -18,7 +18,7 @@ namespace
 {
 bool compareByLatency(const PerformanceResult &A, const PerformanceResult &B)
 {
-    return A.LatencyMs < B.LatencyMs;
+    return A.TransferDelayMs < B.TransferDelayMs;
 }
 
 bool compareBySpeed(const PerformanceResult &A, const PerformanceResult &B)
@@ -282,8 +282,10 @@ int main(int argc, char *argv[])
 
     if (Reachable > 0)
     {
+        const float AvgDelayInSeconds =
+            (static_cast<float>(AverageNetworkDelay) / static_cast<float>(Reachable)) / 1000.0f;
         std::cout << "\n  Average time to start transfer: " << std::fixed << std::setprecision(2)
-                  << (AvgLatency / Reachable) << " ms\n";
+                  << AvgDelayInSeconds << " seconds\n";
         std::cout << "  Average speed: " << std::fixed << std::setprecision(2) << (AvgSpeed / Reachable) << " Mbps\n";
 
         // Filter reachable results

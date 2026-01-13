@@ -51,7 +51,9 @@ double PerformanceTester::measureLatencyMs(const std::string &Url, std::string &
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, discardCallback);
 
-    START_MEASURED_CURL_PERFORMANCE;
+    const auto Start = std::chrono::steady_clock::now();
+    CURLcode Res = curl_easy_perform(curl);
+    const auto End = std::chrono::steady_clock::now();
 
     IS_CURLE_OKAY
 
@@ -66,7 +68,8 @@ double PerformanceTester::measureLatencyMs(const std::string &Url, std::string &
         }
     }
 
-    WRAP_UP_MEASURED_CURL_PERFORMANCE;
+    const auto Duration = std::chrono::duration_cast<std::chrono::milliseconds>(End - Start);
+    curl_easy_cleanup(curl);
 
     return static_cast<double>(Duration.count());
 }
@@ -95,8 +98,7 @@ double PerformanceTester::measureDownloadSpeedMbps(const std::string &Url, std::
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
 
-    START_MEASURED_CURL_PERFORMANCE;
-
+    CURLcode Res = curl_easy_perform(curl);
     IS_CURLE_OKAY
 
     long HttpStatus = 0;
@@ -124,7 +126,6 @@ double PerformanceTester::measureDownloadSpeedMbps(const std::string &Url, std::
     curl_off_t AvgSpeedBytesPerSec = 0;
     curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD_T, &AvgSpeedBytesPerSec);
 
-    WRAP_UP_MEASURED_CURL_PERFORMANCE;
 
     const double Seconds = std::max(1e-9, Duration.count() / 1000.0); // avoid divide-by-zero
     const long long SafeBytes = static_cast<long long>(std::max<curl_off_t>(0, BytesDownloaded));

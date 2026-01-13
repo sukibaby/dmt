@@ -6,15 +6,6 @@
 #include <string>
 #include <vector>
 
-#define START_MEASURED_CURL_PERFORMANCE                                                                                \
-    const auto Start = std::chrono::steady_clock::now();                                                               \
-    CURLcode Res = curl_easy_perform(curl);                                                                            \
-    const auto End = std::chrono::steady_clock::now();
-
-#define WRAP_UP_MEASURED_CURL_PERFORMANCE                                                                              \
-    const auto Duration = std::chrono::duration_cast<std::chrono::milliseconds>(End - Start);                          \
-    curl_easy_cleanup(curl);
-
 #define IS_CURLE_OKAY                                                                                                  \
     if (Res != CURLE_OK)                                                                                               \
     {                                                                                                                  \

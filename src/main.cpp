@@ -218,6 +218,11 @@ int main(int argc, char *argv[])
                 std::cout << "Using request timeout of " << TimeoutSeconds << " seconds (" << TimeoutArgs << " ms)\n";
             }
         }
+        else
+        {
+            std::cerr << "Error: Unknown option '" << Arg << "'\n";
+            return 1;
+        }
     }
 
     // Validate that --country was given a valid code

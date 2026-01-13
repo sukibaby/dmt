@@ -288,7 +288,6 @@ int main(int argc, char *argv[])
                   << AvgDelayInSeconds << " seconds\n";
         std::cout << "  Average speed: " << std::fixed << std::setprecision(2) << (AvgSpeed / Reachable) << " Mbps\n";
 
-        // Filter reachable results
         std::vector<PerformanceResult> ReachableResults;
         for (const auto &Result : Results)
         {

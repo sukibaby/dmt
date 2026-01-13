@@ -64,7 +64,7 @@ std::string howdy()
   --timeout <milliseconds>      How long to wait before giving up on each mirror. Default is )";
     Out << (static_cast<double>(PerformanceTester::DefaultTimeoutMs) / 1000.0) << " seconds ("
         << PerformanceTester::DefaultTimeoutMs << " ms).\n";
-    Out << R"(  --help                        This help message!
+    Out << R"(  --help                        This help message! For further details, please see the man page (man dmt).
 )";
     return Out.str();
 }

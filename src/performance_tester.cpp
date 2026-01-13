@@ -112,28 +112,33 @@ double PerformanceTester::measureDownloadSpeedMbps(const std::string &Url, std::
         }
     }
 
-    // Common case: servers send Content-Length, so use it.
-    // Fallback: if missing/unknown, use the actual downloaded byte count.
-    curl_off_t BytesDownloaded = -1;
-    curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &BytesDownloaded);
-    if (BytesDownloaded <= 0)
-    {
-        curl_off_t ActualDownloaded = 0;
-        curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD_T, &ActualDownloaded);
-        BytesDownloaded = ActualDownloaded;
-    }
-
     curl_off_t AvgSpeedBytesPerSec = 0;
     curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD_T, &AvgSpeedBytesPerSec);
 
-
-    const double Seconds = std::max(1e-9, Duration.count() / 1000.0); // avoid divide-by-zero
-    const long long SafeBytes = static_cast<long long>(std::max<curl_off_t>(0, BytesDownloaded));
-
     if (AvgSpeedBytesPerSec > 0)
-        return (static_cast<double>(AvgSpeedBytesPerSec) * 8.0) / (1024.0 * 1024.0);
+    {
+        curl_easy_cleanup(curl);
+        return static_cast<double>((AvgSpeedBytesPerSec) * 8.0) / (1024.0 * 1024.0);
+    }
+    else
+    {
+        // In 99% of failure cases, curl will give a clear error code.
+        // If we're here, we probably got caught in something like a
+        // JavaScript verification challenge that curl can't handle.
+        curl_off_t BytesDownloaded = 0;
+        curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD_T, &BytesDownloaded);
+        const long long SafeBytes = static_cast<long long>(std::max<curl_off_t>(0, BytesDownloaded));
+        if (SafeBytes == 0)
+        {
+            ErrorMessage = "Got a valid response, but couldn't download any data";
+            curl_easy_cleanup(curl);
+            return -1.0;
+        }
+    }
 
-    return bytesToMbps(SafeBytes, Seconds);
+    ErrorMessage = "Both speed and downloaded size reported as zero";
+    curl_easy_cleanup(curl);
+    return -1.0;
 }
 
 // Test a mirror: measure latency and download speed.

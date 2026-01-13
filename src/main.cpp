@@ -192,9 +192,9 @@ int main(int argc, char *argv[])
 
             if (TimeoutArgs < 1000)
             {
-                std::cerr << "\nWARNING: a timeout of less than 1 second is not recommended.\n" <<
-                "As a reminder, --timeout takes a time value measured in milliseconds.\n" <<
-                "Did you definitely mean to run the program with such a short timeout? (y/n): ";
+                std::cerr << "\nWARNING: a timeout of less than 1 second is not recommended.\n"
+                          << "As a reminder, --timeout takes a time value measured in milliseconds.\n"
+                          << "Did you definitely mean to run the program with such a short timeout? (y/n): ";
                 char Response;
                 std::cin >> Response;
                 if (Response != 'y' && Response != 'Y')
@@ -289,9 +289,9 @@ int main(int argc, char *argv[])
     // Now that we know how many mirrors we have, ensure TopCount is not some larger value
     if (static_cast<size_t>(TopCount) > Mirrors.size())
     {
-        std::cout << "We were hoping to display " << TopCount << " mirrors, but I could only find " <<
-        Mirrors.size() << " suitable mirrors, so I'll provide a ranking of all " << Mirrors.size() <<
-        " after testing is complete.\n";
+        std::cout << "We were hoping to display results for the top " << TopCount << " mirrors, but "
+        << "I could only find " << Mirrors.size() << " valid mirrors, so I'll be sure everything is "
+        << "displayed in the final results.\n";
         TopCount = static_cast<int>(Mirrors.size());
     }
 

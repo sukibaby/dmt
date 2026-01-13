@@ -28,8 +28,8 @@ bool compareBySpeed(const PerformanceResult &A, const PerformanceResult &B)
 
 int myStoi(const char *flag, const char *ia)
 {
-    int_least64_t ret; // if some architecture really has weird int sizes, then let it rock baby
     auto [endpointer, errorcode] = std::from_chars(ia, ia + std::strlen(ia), ret);
+    long long ret; // if some architecture really has weird int sizes, then let it rock baby
 
     // Assuming the user intentionally meant "as large as possible", just clamp to max int.
     // (this is presumably to disable timeouts or show all results in the final ranking)

@@ -26,7 +26,7 @@ bool compareBySpeed(const PerformanceResult &A, const PerformanceResult &B)
     return A.DownloadSpeedMbps > B.DownloadSpeedMbps;
 }
 
-int myStoi(const char *flag, int limit, const char *ia)
+int myStoi(const char *flag, const char *ia)
 {
     int_least64_t ret; // if some architecture really has weird int sizes, then let it rock baby
     auto [endpointer, errorcode] = std::from_chars(ia, ia + std::strlen(ia), ret);
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
         {
             // We'll clamp this later after fetching mirrors. So for now, just parse/validate.
             const char *countValueString = argv[++i];
-            TopCount = myStoi("--count", std::numeric_limits<int>::max(), countValueString);
+            TopCount = myStoi("--count", countValueString);
         }
         else if (Arg == "--help")
         {
@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
         else if (Arg == "--timeout" && i + 1 < argc)
         {
             const char *timeoutValueString = argv[++i];
-            const int TimeoutArgs = myStoi("--timeout", MaxTimeoutMs, timeoutValueString);
+            const int TimeoutArgs = myStoi("--timeout", timeoutValueString);
             PerformanceTester::RequestTimeoutMs.store(static_cast<long>(TimeoutArgs));
 
             if (TimeoutArgs < 1000)

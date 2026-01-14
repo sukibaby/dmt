@@ -31,11 +31,10 @@ long myStoi(const char *flag, const char *inputStr)
     long long ret; // if some architecture really has weird int sizes, then let it rock baby
     auto [endpointer, errorcode] = std::from_chars(inputStr, inputStr + std::strlen(inputStr), ret);
 
-    // Assuming the user intentionally meant "as large as possible", just clamp to max int.
-    // (this is presumably to disable timeouts or show all results in the final ranking)
-    // We need to check out_of_range first for consistency between compilers
-    if (errorcode == std::errc::result_out_of_range)
-        return std::numeric_limits<int>::max();
+    // Assuming the user intentionally meant "as large as possible" as a way to disable timeouts / ranking cutoffs.
+    // We need to check out_of_range first for consistency between compilers.
+    if (errorcode == std::errc::result_out_of_range || ret >= (long long)std::numeric_limits<long>::max())
+        return kDisabledFlag;
 
     if (errorcode == std::errc::invalid_argument || ret == 0)
     {
@@ -187,10 +186,14 @@ int main(int argc, char *argv[])
         else if (Arg == "--timeout" && i + 1 < argc)
         {
             const char *timeoutValueString = argv[++i];
-            PerformanceTester::RequestTimeoutMs.store(static_cast<long>(TimeoutArgs));
             long TimeoutArgs = myStoi("--timeout", timeoutValueString);
 
-            if (TimeoutArgs < 1000)
+            if (TimeoutArgs == kDisabledFlag)
+            {
+                std::cout << "Request timeouts are disabled.\n";
+                PerformanceTester::RequestTimeoutMs.store(kDisabledFlag);
+                continue;
+            }
             else if (TimeoutArgs < 1000L)
             {
                 std::cerr << "\nWARNING: a timeout of less than 1 second is not recommended.\n"
@@ -208,16 +211,13 @@ int main(int argc, char *argv[])
             {
                 std::cout << "Note: A timeout of less than 3 seconds may lead to many mirrors being marked as unreachable.\n";
             }
-            else if (TimeoutArgs == std::numeric_limits<int>::max())
-            {
-                // fun fact - INT_MAX is 2147483647, which is about 3.5 weeks. i wonder if curl will try to wait that long...
-                std::cout << "Request timeouts are disabled.\n";
-            }
             else
             {
                 const float TimeoutSeconds = static_cast<float>(TimeoutArgs) / 1000.0f;
                 std::cout << "Using request timeout of " << TimeoutSeconds << " seconds (" << TimeoutArgs << " ms)\n";
             }
+
+            PerformanceTester::RequestTimeoutMs.store(static_cast<long>(TimeoutArgs));
         }
         else
         {
@@ -293,7 +293,12 @@ int main(int argc, char *argv[])
     }
 
     // Now that we know how many mirrors we have, ensure TopCount is not some larger value
-    if (static_cast<size_t>(TopCount) > Mirrors.size())
+    if (TopCount == kDisabledFlag)
+    {
+        // The user wants all results displayed.
+        TopCount = static_cast<long>(Mirrors.size());
+    }
+    else if (static_cast<size_t>(TopCount) > Mirrors.size())
     {
         std::cout << "We were hoping to display results for the top " << TopCount << " mirrors, but "
         << "I could only find " << Mirrors.size() << " valid mirrors, so I'll be sure everything is "

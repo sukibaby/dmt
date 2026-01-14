@@ -6,6 +6,9 @@
 #include <string>
 #include <vector>
 
+// Used in various places to represent disabled timeouts/unlimited counts.
+constexpr long kDisabledFlag = -1L;
+
 struct PerformanceResult
 {
     DebianMirror Mirror;

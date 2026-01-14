@@ -25,8 +25,7 @@ static std::string CURLcodeToString(CURLcode Res, long TimeoutMs = 0)
         return "DNS resolution failed";
     if (Res == CURLE_OPERATION_TIMEDOUT)
     {
-        // INT_MAX = disabled timeout (we'll let CURL handle timing out by itself instead of us doing it)
-        if (TimeoutMs == (long)std::numeric_limits<int>::max())
+        if (TimeoutMs == kDisabledFlag)
             return "Timeout (declared by CURL)";
         return "Timeout (" + std::to_string(TimeoutMs) + " ms)";
     }
@@ -53,10 +52,12 @@ double PerformanceTester::measureLatencyMs(const std::string &Url, std::string &
     curl_easy_setopt(curl, CURLOPT_NOBODY, 1L); // HEAD request only
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     const long TimeoutMs = static_cast<long>(PerformanceTester::RequestTimeoutMs.load());
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, TimeoutMs); // overall timeout
-    const long ConnectTimeoutMs = std::max(100L, TimeoutMs / 2);
-    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS,
-                     ConnectTimeoutMs); // connect timeout
+    if (TimeoutMs != kDisabledFlag)
+    {
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, TimeoutMs); // overall timeout
+        const long ConnectTimeoutMs = std::max(100L, TimeoutMs / 2);
+        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, ConnectTimeoutMs); // connect timeout
+    }
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, discardCallback);
 
@@ -108,7 +109,8 @@ double PerformanceTester::measureDownloadSpeedMbps(const std::string &Url, std::
     curl_easy_setopt(curl, CURLOPT_URL, TestUrl.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, discardCallback);
     const long TimeoutMs = static_cast<long>(PerformanceTester::RequestTimeoutMs.load());
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, TimeoutMs);
+    if (TimeoutMs != kDisabledFlag)
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, TimeoutMs);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
 

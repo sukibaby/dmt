@@ -94,7 +94,6 @@ void printTopResults(std::ostream &Out, const std::vector<T> &Source, int TopCou
     std::vector<T> Temp = Source;
     std::sort(Temp.begin(), Temp.end(), Comp);
 
-    Out << "\n  Top " << static_cast<size_t>(TopCount) << " " << HeadingText << ":\n";
     for (size_t Idx = 0; Idx < static_cast<size_t>(TopCount) && Idx < Temp.size(); ++Idx)
     {
         const auto &Item = Temp[Idx];
@@ -338,12 +337,14 @@ int main(int argc, char *argv[])
                 ReachableResults.push_back(Result);
         }
 
-        // Top results by latency (fastest first, slowest last)
-        printTopResults(std::cout, ReachableResults, TopCount, compareByLatency, "ranked by time to start transfer",
+        const size_t DisplayCount = std::min(static_cast<size_t>(TopCount), ReachableResults.size());
+
+        std::cout << "\n  Top " << DisplayCount << " ranked by time to start transfer:\n";
+        printTopResults(std::cout, ReachableResults, static_cast<int>(DisplayCount), compareByLatency,
                         &PerformanceResult::TransferDelayMs, " ms");
 
-        // Top results by speed (fastest first, slowest last)
-        printTopResults(std::cout, ReachableResults, TopCount, compareBySpeed, "ranked by overall download speed",
+        std::cout << "\n  Top " << DisplayCount << " ranked by overall download speed:\n";
+        printTopResults(std::cout, ReachableResults, static_cast<int>(DisplayCount), compareBySpeed,
                         &PerformanceResult::DownloadSpeedMbps, " Mbps");
     }
 

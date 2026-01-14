@@ -74,19 +74,6 @@ void printTestingDuration(std::ostream &Out, std::chrono::steady_clock::time_poi
     Out << "Testing complete. Took " << Duration.count() << " seconds.\n\n";
 }
 
-void printInitialResults(std::ostream &Out, size_t TotalTested, int Reachable)
-{
-    const float PercentReachable =
-        (TotalTested > 0) ? (static_cast<float>(Reachable) / static_cast<float>(TotalTested) * 100.0f) : 0.0f;
-
-    Out << std::string(100, '=') << "\n\n";
-    Out << "Summary:\n";
-    Out << "  Total mirrors tested: " << TotalTested << "\n";
-    Out << "  Reachable mirrors: " << Reachable << " (" << PercentReachable << "%)\n";
-    Out << "  Unreachable mirrors: " << (TotalTested - static_cast<size_t>(Reachable)) << " ("
-        << (100.0f - PercentReachable) << "%)\n";
-}
-
 template <typename T, typename Comparator, typename MetricT>
 void printTopResults(std::ostream &Out, const std::vector<T> &Source, int TopCount, Comparator Comp,
                     MetricT T::*MetricMember, std::string_view MetricUnit)
@@ -318,7 +305,15 @@ int main(int argc, char *argv[])
         }
     }
 
-    printInitialResults(std::cout, Results.size(), Reachable);
+    const float PercentReachable =
+        (Results.size() > 0) ? (static_cast<float>(Reachable) / static_cast<float>(Results.size()) * 100.0f) : 0.0f;
+
+    std::cout << std::string(100, '=') << "\n\n";
+    std::cout << "Summary:\n";
+    std::cout << "  Total mirrors tested: " << Results.size() << "\n";
+    std::cout << "  Reachable mirrors: " << Reachable << " (" << PercentReachable << "%)\n";
+    std::cout << "  Unreachable mirrors: " << (Results.size() - static_cast<size_t>(Reachable)) << " ("
+              << (100.0f - PercentReachable) << "%)\n";
 
     if (Reachable > 0)
     {

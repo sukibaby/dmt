@@ -48,9 +48,6 @@ long myStoi(const char *flag, const char *inputStr)
         std::exit(EXIT_FAILURE);
     }
 
-    if (ret > (long long)std::numeric_limits<int>::max())
-        return std::numeric_limits<int>::max();
-
     return static_cast<long>(ret);
 }
 

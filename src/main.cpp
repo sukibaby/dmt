@@ -278,10 +278,10 @@ int main(int argc, char *argv[])
             std::cout << "After filtering: " << Mirrors.size() << " mirrors.\n";
     }
 
-    // Now that we know how many mirrors we have, ensure TopCount is not some larger value
-    if (TopCount == kDisabledFlag)
-    {
-        // The user wants all results displayed.
+    // Now that we know how many mirrors we have, ensure TopCount is not some larger value.
+    // If we got the disabled flag, then internally that really just means to set this value
+    // to match whatever the number of mirrors we tested in total.
+    if (TopCount == kDisabledFlag || static_cast<size_t>(TopCount) > Mirrors.size())
         TopCount = static_cast<long>(Mirrors.size());
 
     const auto StartTime = std::chrono::steady_clock::now();

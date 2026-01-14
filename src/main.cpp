@@ -143,10 +143,9 @@ int main(int argc, char *argv[])
     long TopCount = 5L; // default number of "Top" results to display
 
     // Check argument size before parsing
-    constexpr int MaxArgs = 4096;
     if (argc < 0)
         return 1; // defensive
-    if (argc > MaxArgs)
+    if (argc > 4096)
     {
         std::cerr << "Error: too many arguments\n";
         return 1;

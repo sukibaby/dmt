@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
             else
             {
                 const float TimeoutSeconds = static_cast<float>(TimeoutArgs) / 1000.0f;
-                std::cout << "Using request timeout of " << TimeoutSeconds << " seconds (" << TimeoutArgs << " ms)\n";
+                std::cout << "Using timeout value of " << TimeoutSeconds << " seconds (" << TimeoutArgs << " ms)\n";
             }
 
             PerformanceTester::RequestTimeoutMs.store(static_cast<long>(TimeoutArgs));

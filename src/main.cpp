@@ -67,6 +67,7 @@ void printHelp() {
         std::cout << "  " << std::left << std::setw(32) << opt.first
                   << opt.second << "\n";
     }
+    std::exit(EXIT_SUCCESS);
 }
 } // namespace
 
@@ -151,7 +152,6 @@ int main(int argc, char *argv[]) {
             TopCount = myStoi("--count", countValueString);
         } else if (Arg == "--help") {
             printHelp();
-            return 0;
         } else if (Arg == "--timeout" && i + 1 < argc) {
             const char *timeoutValueString = argv[++i];
             long TimeoutArgs = myStoi("--timeout", timeoutValueString);

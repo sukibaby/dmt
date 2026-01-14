@@ -240,11 +240,6 @@ int main(int argc, char *argv[])
                 std::cout << "Using official mirrors for " << TargetCountry << "...\n";
                 Mirrors = MirrorFetcher::getOfficialMirrors(TargetCountry);
             }
-            else
-            {
-                std::cerr << "Error: Invalid country code '" << Location << "'\n";
-                return 1;
-            }
         }
         else
         {

@@ -26,7 +26,7 @@ bool compareBySpeed(const PerformanceResult &A, const PerformanceResult &B)
     return A.DownloadSpeedMbps > B.DownloadSpeedMbps;
 }
 
-int myStoi(const char *flag, const char *inputStr)
+long myStoi(const char *flag, const char *inputStr)
 {
     long long ret; // if some architecture really has weird int sizes, then let it rock baby
     auto [endpointer, errorcode] = std::from_chars(inputStr, inputStr + std::strlen(inputStr), ret);
@@ -52,7 +52,7 @@ int myStoi(const char *flag, const char *inputStr)
     if (ret > (long long)std::numeric_limits<int>::max())
         return std::numeric_limits<int>::max();
 
-    return static_cast<int>(ret);
+    return static_cast<long>(ret);
 }
 
 std::string howdy()
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
     bool CountrySpecified = false;
     bool ExcludeOfficial = false;
     bool OnlyOfficial = false;
-    int TopCount = 5; // default number of "Top" results to display
+    long TopCount = 5L; // default number of "Top" results to display
 
     // Check argument size before parsing
     constexpr int MaxArgs = 4096;
@@ -187,10 +187,11 @@ int main(int argc, char *argv[])
         else if (Arg == "--timeout" && i + 1 < argc)
         {
             const char *timeoutValueString = argv[++i];
-            const int TimeoutArgs = myStoi("--timeout", timeoutValueString);
             PerformanceTester::RequestTimeoutMs.store(static_cast<long>(TimeoutArgs));
+            long TimeoutArgs = myStoi("--timeout", timeoutValueString);
 
             if (TimeoutArgs < 1000)
+            else if (TimeoutArgs < 1000L)
             {
                 std::cerr << "\nWARNING: a timeout of less than 1 second is not recommended.\n"
                           << "As a reminder, --timeout takes a time value measured in milliseconds.\n"
@@ -203,7 +204,7 @@ int main(int argc, char *argv[])
                 }
                 std::cerr << "\n";
             }
-            else if (TimeoutArgs < 3000)
+            else if (TimeoutArgs < 3000L)
             {
                 std::cout << "Note: A timeout of less than 3 seconds may lead to many mirrors being marked as unreachable.\n";
             }
@@ -297,7 +298,7 @@ int main(int argc, char *argv[])
         std::cout << "We were hoping to display results for the top " << TopCount << " mirrors, but "
         << "I could only find " << Mirrors.size() << " valid mirrors, so I'll be sure everything is "
         << "displayed in the final results.\n";
-        TopCount = static_cast<int>(Mirrors.size());
+        TopCount = static_cast<long>(Mirrors.size());
     }
 
     const auto StartTime = std::chrono::steady_clock::now();

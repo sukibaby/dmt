@@ -283,14 +283,6 @@ int main(int argc, char *argv[])
     {
         // The user wants all results displayed.
         TopCount = static_cast<long>(Mirrors.size());
-    }
-    else if (static_cast<size_t>(TopCount) > Mirrors.size())
-    {
-        std::cout << "We were hoping to display results for the top " << TopCount << " mirrors, but "
-        << "I could only find " << Mirrors.size() << " valid mirrors, so I'll be sure everything is "
-        << "displayed in the final results.\n";
-        TopCount = static_cast<long>(Mirrors.size());
-    }
 
     const auto StartTime = std::chrono::steady_clock::now();
     auto Results = PerformanceTester::testAllMirrors(Mirrors);

@@ -28,6 +28,8 @@ class PerformanceTester
     static PerformanceResult testMirror(const DebianMirror &Mirror);
     static std::vector<PerformanceResult> testAllMirrors(const std::vector<DebianMirror> &Mirrors);
 
+    // libcurl's API for timeout via CURLOPT_TIMEOUT_MS uses a long,
+    // which is why this variable is also of type long.
     inline static std::atomic<long> RequestTimeoutMs{DefaultTimeoutMs};
 
   private:

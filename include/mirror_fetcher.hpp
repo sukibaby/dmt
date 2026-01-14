@@ -14,7 +14,7 @@ class MirrorFetcher
 
   private:
     static std::vector<DebianMirror> parseHtmlMirrorList(std::string_view Html);
-    static size_t writeCallback(void *Contents, size_t Size, size_t NumMembers, std::string *UserP);
+    static size_t writeCallback(void *Contents, size_t Size, size_t NumMembers, std::string *UserStringPtr);
     static std::string extractHostname(std::string_view Url);
 };
 

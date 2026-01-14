@@ -10,10 +10,10 @@
 
 // libcurl write callback that discards received data.
 // Returns number of bytes processed (Size * NumMembers).
-static size_t discardCallback(void *Contents, size_t Size, size_t NumMembers, void *UserP)
+static size_t discardCallback(void *Contents, size_t Size, size_t NumMembers, void *UserPointer)
 {
     (void)Contents;
-    (void)UserP;
+    (void)UserPointer;
     return Size * NumMembers;
 }
 

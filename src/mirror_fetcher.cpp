@@ -8,9 +8,9 @@
 
 // libcurl write callback — append received data to the provided std::string.
 // Returns number of bytes written (Size * NumMembers).
-size_t MirrorFetcher::writeCallback(void *Contents, size_t Size, size_t NumMembers, std::string *UserP)
+size_t MirrorFetcher::writeCallback(void *Contents, size_t Size, size_t NumMembers, std::string *UserStringPtr)
 {
-    UserP->append((char *)Contents, Size * NumMembers);
+    UserStringPtr->append((char *)Contents, Size * NumMembers);
     return Size * NumMembers;
 }
 
@@ -35,21 +35,21 @@ std::vector<DebianMirror> MirrorFetcher::fetchMirrors()
     curl_easy_setopt(Curl, CURLOPT_TIMEOUT, 15L);
     curl_easy_setopt(Curl, CURLOPT_FOLLOWLOCATION, 1L);
 
-    CURLcode Res = CURLE_OK;
+    CURLcode FetchResponse = CURLE_OK;
     for (size_t Idx = 0; Idx < NumUrls; ++Idx)
     {
         Response.clear();
         curl_easy_setopt(Curl, CURLOPT_URL, Urls[Idx]);
 
-        Res = curl_easy_perform(Curl);
-        if (Res == CURLE_OK)
+        FetchResponse = curl_easy_perform(Curl);
+        if (FetchResponse == CURLE_OK)
         {
             std::cout << "Successfully fetched mirrors from: " << Urls[Idx] << "\n";
             curl_easy_cleanup(Curl);
             return parseHtmlMirrorList(Response);
         }
 
-        std::cerr << "Attempt " << (Idx + 1) << " failed (" << Urls[Idx] << "): " << curl_easy_strerror(Res) << "\n";
+        std::cerr << "Attempt " << (Idx + 1) << " failed (" << Urls[Idx] << "): " << curl_easy_strerror(FetchResponse) << "\n";
     }
 
     std::cerr << "All mirror fetch attempts failed\n";

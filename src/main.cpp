@@ -89,12 +89,11 @@ void printInitialResults(std::ostream &Out, size_t TotalTested, int Reachable)
 
 template <typename T, typename Comparator, typename MetricT>
 void printTopResults(std::ostream &Out, const std::vector<T> &Source, int TopCount, Comparator Comp,
-                    std::string_view HeadingText, MetricT T::*MetricMember, std::string_view MetricUnit)
+                    MetricT T::*MetricMember, std::string_view MetricUnit)
 {
     std::vector<T> Temp = Source;
     std::sort(Temp.begin(), Temp.end(), Comp);
 
-    Out << "\n  Top " << static_cast<size_t>(TopCount) << " " << HeadingText << ":\n";
     for (size_t Idx = 0; Idx < static_cast<size_t>(TopCount) && Idx < Temp.size(); ++Idx)
     {
         const auto &Item = Temp[Idx];
@@ -325,9 +324,11 @@ int main(int argc, char *argv[])
     {
         const float AvgDelayInSeconds =
             (static_cast<float>(AverageNetworkDelay) / static_cast<float>(Reachable)) / 1000.0f;
-        std::cout << "\n  Average time to start transfer: " << std::fixed << std::setprecision(2)
-                  << AvgDelayInSeconds << " seconds\n";
-        std::cout << "  Average speed: " << std::fixed << std::setprecision(2) << (AverageSpeed / Reachable) << " Mbps\n";
+
+        std::cout << "\n  Average time to start transfer: " << std::fixed << std::setprecision(2) << AvgDelayInSeconds
+                  << " seconds\n";
+        std::cout << "  Average speed: " << std::fixed << std::setprecision(2) << (AverageSpeed / Reachable)
+                  << " Mbps\n";
 
         std::vector<PerformanceResult> ReachableResults;
         for (const auto &Result : Results)
@@ -336,12 +337,28 @@ int main(int argc, char *argv[])
                 ReachableResults.push_back(Result);
         }
 
-        // Top results by latency (fastest first, slowest last)
-        printTopResults(std::cout, ReachableResults, Reachable, compareByLatency, "ranked by time to start transfer",
+        const size_t DisplayCount = std::min(static_cast<size_t>(TopCount), ReachableResults.size());
+
+        if (DisplayCount == ReachableResults.size())
+        {
+            std::cout << "\n  Top " << DisplayCount << " ranked by time to start transfer:\n";
+        }
+        else
+        {
+            std::cout << "\n  All available mirrors ranked by time to start transfer:\n";
+        }
+        printTopResults(std::cout, ReachableResults, static_cast<int>(DisplayCount), compareByLatency,
                         &PerformanceResult::TransferDelayMs, " ms");
 
-        // Top results by speed (fastest first, slowest last)
-        printTopResults(std::cout, ReachableResults, Reachable, compareBySpeed, "ranked by overall download speed",
+        if (DisplayCount == ReachableResults.size())
+        {
+            std::cout << "\n  Top " << DisplayCount << " ranked by overall download speed:\n";
+        }
+        else
+        {
+            std::cout << "\n  All available mirrors ranked by overall download speed:\n";
+        }
+        printTopResults(std::cout, ReachableResults, static_cast<int>(DisplayCount), compareBySpeed,
                         &PerformanceResult::DownloadSpeedMbps, " Mbps");
     }
 

@@ -197,9 +197,7 @@ int main(int argc, char *argv[])
                 char Response;
                 std::cin >> Response;
                 if (Response != 'y' && Response != 'Y')
-                {
                     std::exit(EXIT_FAILURE);
-                }
                 std::cerr << "\n";
             }
             else if (TimeoutArgs < 3000L)

@@ -51,19 +51,22 @@ long myStoi(const char *flag, const char *inputStr)
     return static_cast<long>(ret);
 }
 
-std::string howdy()
+const std::vector<std::pair<const char*, const char*>> helpOptions = {
+    {"--country <code>",
+     "Filter mirrors by country. Uses ISO 3166-1 alpha-2 country codes (such as FR, DE, US, CN, etc.)"},
+    {"--no-official-mirrors", "Exclude debian.org mirrors"},
+    {"--only-official-mirrors", "Only test debian.org mirrors"},
+    {"--count <number>", "Number of top results to display. By default, the top 5 are shown."},
+    {"--timeout <milliseconds>", "How long to wait before giving up, per mirror."},
+    {"--help", "This help message! For further details, please see the man page (man dmt)."},
+};
+
+void printHelp()
 {
-    std::ostringstream Out;
-    Out << R"(  --country <code>              Filter mirrors by country. Uses ISO 3166-1 alpha-2 country codes (such as FR, DE, US, CN, etc.)
-  --no-official-mirrors         Exclude debian.org mirrors
-  --only-official-mirrors       Only test debian.org mirrors
-  --count <number>              Number of top results to display. Default is 5.
-  --timeout <milliseconds>      How long to wait before giving up on each mirror. Default is )";
-    Out << (static_cast<double>(PerformanceTester::DefaultTimeoutMs) / 1000.0) << " seconds ("
-        << PerformanceTester::DefaultTimeoutMs << " ms).\n";
-    Out << R"(  --help                        This help message! For further details, please see the man page (man dmt).
-)";
-    return Out.str();
+    for (const auto &opt : helpOptions)
+    {
+        std::cout << "  " << std::left << std::setw(32) << opt.first << opt.second << "\n";
+    }
 }
 } // namespace
 
@@ -162,7 +165,7 @@ int main(int argc, char *argv[])
         }
         else if (Arg == "--help")
         {
-            std::cout << howdy();
+            printHelp();
             return 0;
         }
         else if (Arg == "--timeout" && i + 1 < argc)

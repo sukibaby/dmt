@@ -187,7 +187,8 @@ int main(int argc, char *argv[])
             if (TimeoutArgs == kDisabledFlag)
             {
                 std::cout << "Request timeouts are disabled.\n";
-                TimeoutArgs = std::numeric_limits<long>::max();
+                PerformanceTester::RequestTimeoutMs.store(kDisabledFlag);
+                continue;
             }
             else if (TimeoutArgs < 1000L)
             {
@@ -202,8 +203,7 @@ int main(int argc, char *argv[])
             }
             else if (TimeoutArgs < 3000L)
             {
-                std::cout
-                    << "Note: A timeout of less than 3 seconds may lead to many mirrors being marked as unreachable.\n";
+                std::cout << "Note: A timeout of less than 3 seconds may lead to many mirrors being marked as unreachable.\n";
             }
             else
             {
@@ -289,8 +289,8 @@ int main(int argc, char *argv[])
     // Now that we know how many mirrors we have, ensure TopCount is not some larger value
     if (TopCount == kDisabledFlag)
     {
-        // The user wants all results displayed, so max out the value here.
-        TopCount = std::numeric_limits<long>::max();
+        // The user wants all results displayed.
+        TopCount = static_cast<long>(Mirrors.size());
     }
     else if (static_cast<size_t>(TopCount) > Mirrors.size())
     {
@@ -336,13 +336,12 @@ int main(int argc, char *argv[])
                 ReachableResults.push_back(Result);
         }
 
-        // TODO: it says the value of total mirrors when listing the reachable mirrors, so it needs to say the reachable mirrors instead
         // Top results by latency (fastest first, slowest last)
-        printTopResults(std::cout, ReachableResults, TopCount, compareByLatency, "ranked by time to start transfer",
+        printTopResults(std::cout, ReachableResults, Reachable, compareByLatency, "ranked by time to start transfer",
                         &PerformanceResult::TransferDelayMs, " ms");
 
         // Top results by speed (fastest first, slowest last)
-        printTopResults(std::cout, ReachableResults, TopCount, compareBySpeed, "ranked by overall download speed",
+        printTopResults(std::cout, ReachableResults, Reachable, compareBySpeed, "ranked by overall download speed",
                         &PerformanceResult::DownloadSpeedMbps, " Mbps");
     }
 

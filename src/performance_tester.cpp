@@ -25,9 +25,9 @@ static std::string CURLcodeToString(CURLcode Res, long TimeoutMs = 0)
         return "DNS resolution failed";
     if (Res == CURLE_OPERATION_TIMEDOUT)
     {
-        if (TimeoutMs == kDisabledFlag)
-            return "Timeout (declared by CURL)";
-        return "Timeout (" + std::to_string(TimeoutMs) + " ms)";
+        if (TimeoutMs != kDisabledFlag)
+            return "Timeout (" + std::to_string(TimeoutMs) + " ms)";
+        return "Our connection timed out";
     }
     return std::string(curl_easy_strerror(Res));
 }

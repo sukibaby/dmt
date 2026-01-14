@@ -33,7 +33,7 @@ long myStoi(const char *flag, const char *inputStr)
 
     // Assuming the user intentionally meant "as large as possible" as a way to disable timeouts / ranking cutoffs.
     // We need to check out_of_range first for consistency between compilers.
-    if (errorcode == std::errc::result_out_of_range)
+    if (errorcode == std::errc::result_out_of_range || ret >= (long long)std::numeric_limits<long>::max())
         return kDisabledFlag;
 
     if (errorcode == std::errc::invalid_argument || ret == 0)
@@ -47,9 +47,6 @@ long myStoi(const char *flag, const char *inputStr)
         std::cerr << "Error: " << flag << " value cannot be negative.\n";
         std::exit(EXIT_FAILURE);
     }
-
-    if (ret > (long long)std::numeric_limits<long>::max())
-        return kDisabledFlag;
 
     return static_cast<long>(ret);
 }
@@ -70,14 +67,14 @@ std::string howdy()
 }
 } // namespace
 
-inline void printTestingDuration(std::ostream &Out, std::chrono::steady_clock::time_point StartTime,
+void printTestingDuration(std::ostream &Out, std::chrono::steady_clock::time_point StartTime,
                                  std::chrono::steady_clock::time_point EndTime)
 {
     const auto Duration = std::chrono::duration_cast<std::chrono::seconds>(EndTime - StartTime);
     Out << "Testing complete. Took " << Duration.count() << " seconds.\n\n";
 }
 
-inline void printInitialResults(std::ostream &Out, size_t TotalTested, int Reachable)
+void printInitialResults(std::ostream &Out, size_t TotalTested, int Reachable)
 {
     const float PercentReachable =
         (TotalTested > 0) ? (static_cast<float>(Reachable) / static_cast<float>(TotalTested) * 100.0f) : 0.0f;
@@ -91,8 +88,8 @@ inline void printInitialResults(std::ostream &Out, size_t TotalTested, int Reach
 }
 
 template <typename T, typename Comparator, typename MetricT>
-inline void printTopResults(std::ostream &Out, const std::vector<T> &Source, int TopCount, Comparator Comp,
-                            std::string_view HeadingText, MetricT T::*MetricMember, std::string_view MetricUnit)
+void printTopResults(std::ostream &Out, const std::vector<T> &Source, int TopCount, Comparator Comp,
+                    std::string_view HeadingText, MetricT T::*MetricMember, std::string_view MetricUnit)
 {
     std::vector<T> Temp = Source;
     std::sort(Temp.begin(), Temp.end(), Comp);
@@ -143,13 +140,12 @@ int main(int argc, char *argv[])
     bool CountrySpecified = false;
     bool ExcludeOfficial = false;
     bool OnlyOfficial = false;
-    long TopCount = 5; // default number of "Top" results to display
+    long TopCount = 5L; // default number of "Top" results to display
 
     // Check argument size before parsing
-    constexpr int MaxArgs = 4096;
     if (argc < 0)
         return 1; // defensive
-    if (argc > MaxArgs)
+    if (argc > 4096)
     {
         std::cerr << "Error: too many arguments\n";
         return 1;
@@ -186,18 +182,14 @@ int main(int argc, char *argv[])
         else if (Arg == "--timeout" && i + 1 < argc)
         {
             const char *timeoutValueString = argv[++i];
-            const long TimeoutArgs = myStoi("--timeout", timeoutValueString);
+            long TimeoutArgs = myStoi("--timeout", timeoutValueString);
 
             if (TimeoutArgs == kDisabledFlag)
             {
                 std::cout << "Request timeouts are disabled.\n";
-                PerformanceTester::RequestTimeoutMs.store(std::numeric_limits<long>::max());
-                continue;
+                TimeoutArgs = std::numeric_limits<long>::max();
             }
-
-            PerformanceTester::RequestTimeoutMs.store(static_cast<long>(TimeoutArgs));
-
-            if (TimeoutArgs < 1000L)
+            else if (TimeoutArgs < 1000L)
             {
                 std::cerr << "\nWARNING: a timeout of less than 1 second is not recommended.\n"
                           << "As a reminder, --timeout takes a time value measured in milliseconds.\n"
@@ -205,24 +197,21 @@ int main(int argc, char *argv[])
                 char Response;
                 std::cin >> Response;
                 if (Response != 'y' && Response != 'Y')
-                {
                     std::exit(EXIT_FAILURE);
-                }
                 std::cerr << "\n";
             }
             else if (TimeoutArgs < 3000L)
             {
-                std::cout << "Note: A timeout of less than 3 seconds may lead to many mirrors being marked as unreachable.\n";
-            }
-            else if (TimeoutArgs == kDisabledFlag)
-            {
-                std::cout << "Request timeouts are disabled.\n";
+                std::cout
+                    << "Note: A timeout of less than 3 seconds may lead to many mirrors being marked as unreachable.\n";
             }
             else
             {
                 const float TimeoutSeconds = static_cast<float>(TimeoutArgs) / 1000.0f;
                 std::cout << "Using request timeout of " << TimeoutSeconds << " seconds (" << TimeoutArgs << " ms)\n";
             }
+
+            PerformanceTester::RequestTimeoutMs.store(static_cast<long>(TimeoutArgs));
         }
         else
         {
@@ -298,12 +287,17 @@ int main(int argc, char *argv[])
     }
 
     // Now that we know how many mirrors we have, ensure TopCount is not some larger value
-    if (static_cast<size_t>(TopCount) > Mirrors.size())
+    if (TopCount == kDisabledFlag)
+    {
+        // The user wants all results displayed, so max out the value here.
+        TopCount = std::numeric_limits<long>::max();
+    }
+    else if (static_cast<size_t>(TopCount) > Mirrors.size())
     {
         std::cout << "We were hoping to display results for the top " << TopCount << " mirrors, but "
         << "I could only find " << Mirrors.size() << " valid mirrors, so I'll be sure everything is "
         << "displayed in the final results.\n";
-        TopCount = static_cast<int>(Mirrors.size());
+        TopCount = static_cast<long>(Mirrors.size());
     }
 
     const auto StartTime = std::chrono::steady_clock::now();

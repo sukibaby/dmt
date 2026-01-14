@@ -6,15 +6,16 @@
 #include <string_view>
 #include <vector>
 
-class MirrorFetcher
-{
+class MirrorFetcher {
   public:
     static std::vector<DebianMirror> fetchMirrors();
-    static std::vector<DebianMirror> getOfficialMirrors(std::string_view CountryName = {});
+    static std::vector<DebianMirror>
+    getOfficialMirrors(std::string_view CountryName = {});
 
   private:
     static std::vector<DebianMirror> parseHtmlMirrorList(std::string_view Html);
-    static size_t writeCallback(void *Contents, size_t Size, size_t NumMembers, std::string *UserStringPtr);
+    static size_t writeCallback(void *Contents, size_t Size, size_t NumMembers,
+                                std::string *UserStringPtr);
     static std::string extractHostname(std::string_view Url);
 };
 

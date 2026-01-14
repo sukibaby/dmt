@@ -9,8 +9,7 @@
 // Used in various places to represent disabled timeouts/unlimited counts.
 constexpr long kDisabledFlag = -1L;
 
-struct PerformanceResult
-{
+struct PerformanceResult {
     DebianMirror Mirror;
     double TransferDelayMs;
     double DownloadSpeedMbps;
@@ -18,8 +17,7 @@ struct PerformanceResult
     std::string ErrorMessage;
 };
 
-class PerformanceTester
-{
+class PerformanceTester {
   public:
     // Default timeout set to 1 minute, represented as milliseconds.
     // Most requests won't take anywhere near this long, but I don't
@@ -29,7 +27,8 @@ class PerformanceTester
     static constexpr long DefaultTimeoutMs = 60000;
 
     static PerformanceResult testMirror(const DebianMirror &Mirror);
-    static std::vector<PerformanceResult> testAllMirrors(const std::vector<DebianMirror> &Mirrors);
+    static std::vector<PerformanceResult>
+    testAllMirrors(const std::vector<DebianMirror> &Mirrors);
 
     // libcurl's API for timeout via CURLOPT_TIMEOUT_MS uses a long,
     // which is why this variable is also of type long.
@@ -43,9 +42,11 @@ class PerformanceTester
 
     // Returns the latency in milliseconds, or -1 if failed
     // Measures latency; on failure returns -1 and fills error_message.
-    static double measureLatencyMs(const std::string &Url, std::string &ErrorMessage);
+    static double measureLatencyMs(const std::string &Url,
+                                   std::string &ErrorMessage);
 
     // Returns the download speed in Mbps, or -1 if failed
     // Measures download speed; on failure returns -1 and fills ErrorMessage.
-    static double measureDownloadSpeedMbps(const std::string &Url, std::string &ErrorMessage);
+    static double measureDownloadSpeedMbps(const std::string &Url,
+                                           std::string &ErrorMessage);
 };

@@ -26,16 +26,15 @@ bool compareBySpeed(const PerformanceResult &A, const PerformanceResult &B)
     return A.DownloadSpeedMbps > B.DownloadSpeedMbps;
 }
 
-int myStoi(const char *flag, const char *inputStr)
+long myStoi(const char *flag, const char *inputStr)
 {
-    long long ret; // if some architecture really has weird int sizes, then let it rock baby
+    long long ret; // ensure we can detect out-of-range for long
     auto [endpointer, errorcode] = std::from_chars(inputStr, inputStr + std::strlen(inputStr), ret);
 
-    // Assuming the user intentionally meant "as large as possible", just clamp to max int.
-    // (this is presumably to disable timeouts or show all results in the final ranking)
-    // We need to check out_of_range first for consistency between compilers
+    // Assuming the user intentionally meant "as large as possible" as a way to disable timeouts / ranking cutoffs.
+    // We need to check out_of_range first for consistency between compilers.
     if (errorcode == std::errc::result_out_of_range)
-        return std::numeric_limits<int>::max();
+        return kDisabledFlag;
 
     if (errorcode == std::errc::invalid_argument || ret == 0)
     {
@@ -49,10 +48,10 @@ int myStoi(const char *flag, const char *inputStr)
         std::exit(EXIT_FAILURE);
     }
 
-    if (ret > (long long)std::numeric_limits<int>::max())
-        return std::numeric_limits<int>::max();
+    if (ret > (long long)std::numeric_limits<long>::max())
+        return kDisabledFlag;
 
-    return static_cast<int>(ret);
+    return static_cast<long>(ret);
 }
 
 std::string howdy()
@@ -144,7 +143,7 @@ int main(int argc, char *argv[])
     bool CountrySpecified = false;
     bool ExcludeOfficial = false;
     bool OnlyOfficial = false;
-    int TopCount = 5; // default number of "Top" results to display
+    long TopCount = 5; // default number of "Top" results to display
 
     // Check argument size before parsing
     constexpr int MaxArgs = 4096;
@@ -187,10 +186,18 @@ int main(int argc, char *argv[])
         else if (Arg == "--timeout" && i + 1 < argc)
         {
             const char *timeoutValueString = argv[++i];
-            const int TimeoutArgs = myStoi("--timeout", timeoutValueString);
+            const long TimeoutArgs = myStoi("--timeout", timeoutValueString);
+
+            if (TimeoutArgs == kDisabledFlag)
+            {
+                std::cout << "Request timeouts are disabled.\n";
+                PerformanceTester::RequestTimeoutMs.store(std::numeric_limits<long>::max());
+                continue;
+            }
+
             PerformanceTester::RequestTimeoutMs.store(static_cast<long>(TimeoutArgs));
 
-            if (TimeoutArgs < 1000)
+            if (TimeoutArgs < 1000L)
             {
                 std::cerr << "\nWARNING: a timeout of less than 1 second is not recommended.\n"
                           << "As a reminder, --timeout takes a time value measured in milliseconds.\n"
@@ -203,13 +210,12 @@ int main(int argc, char *argv[])
                 }
                 std::cerr << "\n";
             }
-            else if (TimeoutArgs < 3000)
+            else if (TimeoutArgs < 3000L)
             {
                 std::cout << "Note: A timeout of less than 3 seconds may lead to many mirrors being marked as unreachable.\n";
             }
-            else if (TimeoutArgs == std::numeric_limits<int>::max())
+            else if (TimeoutArgs == kDisabledFlag)
             {
-                // fun fact - INT_MAX is 2147483647, which is about 3.5 weeks. i wonder if curl will try to wait that long...
                 std::cout << "Request timeouts are disabled.\n";
             }
             else
@@ -336,6 +342,7 @@ int main(int argc, char *argv[])
                 ReachableResults.push_back(Result);
         }
 
+        // TODO: it says the value of total mirrors when listing the reachable mirrors, so it needs to say the reachable mirrors instead
         // Top results by latency (fastest first, slowest last)
         printTopResults(std::cout, ReachableResults, TopCount, compareByLatency, "ranked by time to start transfer",
                         &PerformanceResult::TransferDelayMs, " ms");

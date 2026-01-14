@@ -25,8 +25,7 @@ static std::string CURLcodeToString(CURLcode Res, long TimeoutMs = 0)
         return "DNS resolution failed";
     if (Res == CURLE_OPERATION_TIMEDOUT)
     {
-        // INT_MAX = disabled timeout (we'll let CURL handle timing out by itself instead of us doing it)
-        if (TimeoutMs == (long)std::numeric_limits<int>::max())
+        if (TimeoutMs == kDisabledFlag)
             return "Timeout (declared by CURL)";
         return "Timeout (" + std::to_string(TimeoutMs) + " ms)";
     }
@@ -175,6 +174,7 @@ PerformanceResult PerformanceTester::testMirror(const DebianMirror &Mirror)
     {
         std::string LatencyError;
         result.TransferDelayMs = measureLatencyMs(dm_url(Mirror), LatencyError);
+        // TODO: display time in seconds if over 1000ms (or 10000ms?)
         if ((result.TransferDelayMs) < 0)
         {
             result.IsReachable = false;

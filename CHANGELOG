@@ -1,3 +1,15 @@
+0.2.0
+
+User-facing:
+ - Increase threshold at which transfer display switches to Kbps to anything under 1.0 Mbps
+ - Display connection delay times of at least 10 seconds as seconds rather than milliseconds
+ - Disable default timeout, since curl will timeout on its own
+ - Update man page
+
+Code changes:
+ - Add generic CURLcode-to-string function
+ - Removed last remaining macros
+
 0.1.6
 
  - Resolve inconsistency in argument parsing behavior between GCC and Clang

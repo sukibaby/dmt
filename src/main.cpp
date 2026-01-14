@@ -67,14 +67,14 @@ std::string howdy()
 }
 } // namespace
 
-inline void printTestingDuration(std::ostream &Out, std::chrono::steady_clock::time_point StartTime,
+void printTestingDuration(std::ostream &Out, std::chrono::steady_clock::time_point StartTime,
                                  std::chrono::steady_clock::time_point EndTime)
 {
     const auto Duration = std::chrono::duration_cast<std::chrono::seconds>(EndTime - StartTime);
     Out << "Testing complete. Took " << Duration.count() << " seconds.\n\n";
 }
 
-inline void printInitialResults(std::ostream &Out, size_t TotalTested, int Reachable)
+void printInitialResults(std::ostream &Out, size_t TotalTested, int Reachable)
 {
     const float PercentReachable =
         (TotalTested > 0) ? (static_cast<float>(Reachable) / static_cast<float>(TotalTested) * 100.0f) : 0.0f;
@@ -88,8 +88,8 @@ inline void printInitialResults(std::ostream &Out, size_t TotalTested, int Reach
 }
 
 template <typename T, typename Comparator, typename MetricT>
-inline void printTopResults(std::ostream &Out, const std::vector<T> &Source, int TopCount, Comparator Comp,
-                            std::string_view HeadingText, MetricT T::*MetricMember, std::string_view MetricUnit)
+void printTopResults(std::ostream &Out, const std::vector<T> &Source, int TopCount, Comparator Comp,
+                    MetricT T::*MetricMember, std::string_view MetricUnit)
 {
     std::vector<T> Temp = Source;
     std::sort(Temp.begin(), Temp.end(), Comp);

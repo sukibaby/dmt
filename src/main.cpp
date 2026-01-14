@@ -129,6 +129,7 @@ int main(int argc, char *argv[])
     bool CountrySpecified = false;
     bool ExcludeOfficial = false;
     bool OnlyOfficial = false;
+    bool LoneStandingServer = false;
     long TopCount = 5L; // default number of "Top" results to display
 
     // Check argument size before parsing
@@ -259,8 +260,15 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Announce how many mirrors we parsed from the Debian mirror list
-    std::cout << "Found " << Mirrors.size() << " mirrors.\n";
+    if (Mirrors.size() == 1)
+    {
+        std::cout << "It looks like there's only a single mirror available.\n";
+        LoneStandingServer = true;
+    }
+    else
+    {
+        std::cout << "Fetched " << Mirrors.size() << " mirrors.\n";
+    }
 
     // Apply filtering only if we fetched from the web (not using predefined official mirrors)
     if (!OnlyOfficial)
@@ -288,6 +296,13 @@ int main(int argc, char *argv[])
     auto Results = PerformanceTester::testAllMirrors(Mirrors);
     const auto EndTime = std::chrono::steady_clock::now();
     printTestingDuration(std::cout, StartTime, EndTime);
+
+    // If we only had a single server,
+    // there is no need to continue past this point.
+    if (LoneStandingServer)
+    {
+        return 0;
+    }
 
     int Reachable = 0;
     double AverageNetworkDelay = 0.0;

@@ -70,13 +70,6 @@ void printHelp()
 }
 } // namespace
 
-void printTestingDuration(std::ostream &Out, std::chrono::steady_clock::time_point StartTime,
-                                 std::chrono::steady_clock::time_point EndTime)
-{
-    const auto Duration = std::chrono::duration_cast<std::chrono::seconds>(EndTime - StartTime);
-    Out << "Testing complete. Took " << Duration.count() << " seconds.\n\n";
-}
-
 template <typename T, typename Comparator, typename MetricT>
 void printTopResults(std::ostream &Out, const std::vector<T> &Source, int TopCount, Comparator Comp,
                     MetricT T::*MetricMember, std::string_view MetricUnit)
@@ -287,7 +280,8 @@ int main(int argc, char *argv[])
     const auto StartTime = std::chrono::steady_clock::now();
     auto Results = PerformanceTester::testAllMirrors(Mirrors);
     const auto EndTime = std::chrono::steady_clock::now();
-    printTestingDuration(std::cout, StartTime, EndTime);
+    const auto Duration = std::chrono::duration_cast<std::chrono::seconds>(EndTime - StartTime);
+    std::cout << "\nTesting complete. Took " << Duration.count() << " seconds.\n";
 
     // If we only had a single server,
     // there is no need to continue past this point.
@@ -313,7 +307,7 @@ int main(int argc, char *argv[])
     const float PercentReachable =
         (Results.size() > 0) ? (static_cast<float>(Reachable) / static_cast<float>(Results.size()) * 100.0f) : 0.0f;
 
-    std::cout << std::string(100, '=') << "\n\n";
+    std::cout << "\n" << std::string(100, '=') << "\n\n";
     std::cout << "Summary:\n";
     std::cout << "  Total mirrors tested: " << Results.size() << "\n";
     std::cout << "  Reachable mirrors: " << Reachable << " (" << PercentReachable << "%)\n";

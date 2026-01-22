@@ -16,27 +16,27 @@
 
 namespace {
 bool compareByLatency(const PerformanceResult &A, const PerformanceResult &B) {
-    return A.TransferDelayMs < B.TransferDelayMs;
+    return A.transferDelayMs < B.transferDelayMs;
 }
 
 bool compareBySpeed(const PerformanceResult &A, const PerformanceResult &B) {
-    return A.DownloadSpeedMbps > B.DownloadSpeedMbps;
+    return A.downloadSpeedMbps > B.downloadSpeedMbps;
 }
 
 long myStoi(const char *flag, const char *inputStr) {
     long long ret;
-    auto [endpointer, errorcode] =
+    auto [endPointer, errorCode] =
         std::from_chars(inputStr, inputStr + std::strlen(inputStr), ret);
 
     // Assuming the user intentionally meant "as large as possible" as a way to
     // disable timeouts / ranking cutoffs. We need to check out_of_range first
     // for consistency between compilers.
-    if (errorcode == std::errc::result_out_of_range ||
+    if (errorCode == std::errc::result_out_of_range ||
         ret >= (long long)std::numeric_limits<long>::max()) {
-        return kDisabledFlag;
+        return OPTION_DISABLED;
     }
 
-    if (errorcode == std::errc::invalid_argument || ret == 0) {
+    if (errorCode == std::errc::invalid_argument || ret == 0) {
         std::cerr << "Error: " << flag << " value is out of range.\n";
         std::exit(EXIT_FAILURE);
     }
@@ -72,60 +72,60 @@ void printHelp() {
 } // namespace
 
 template <typename T, typename Comparator, typename MetricT>
-void printTopResults(std::ostream &Out, const std::vector<T> &Source,
-                     int TopCount, Comparator Comp, MetricT T::*MetricMember,
-                     std::string_view MetricUnit) {
-    std::vector<T> Temp = Source;
-    std::sort(Temp.begin(), Temp.end(), Comp);
+void printTopResults(std::ostream &outputStream, const std::vector<T> &source,
+                     int topCount, Comparator comp, MetricT T::*metricMember,
+                     std::string_view metricUnit) {
+    std::vector<T> Temp = source;
+    std::sort(Temp.begin(), Temp.end(), comp);
 
     for (size_t Idx = 0;
-         Idx < static_cast<size_t>(TopCount) && Idx < Temp.size(); ++Idx) {
+         Idx < static_cast<size_t>(topCount) && Idx < Temp.size(); ++Idx) {
         const auto &Item = Temp[Idx];
-        Out << "    " << (Idx + 1) << ". " << dm_url(Item.Mirror) << " - "
-            << std::fixed << std::setprecision(2) << (Item.*MetricMember)
-            << MetricUnit << "\n";
+        outputStream << "    " << (Idx + 1) << ". " << dm_url(Item.Mirror) << " - "
+            << std::fixed << std::setprecision(2) << (Item.*metricMember)
+            << metricUnit << "\n";
     }
 }
 
 // Filter Debian mirrors by country and official status.
 // Returns a vector of mirrors matching the given filters.
 std::vector<DebianMirror>
-filterMirrors(const std::vector<DebianMirror> &Mirrors, bool ExcludeOfficial,
-              bool OnlyOfficial, const std::string &Location) {
-    std::vector<DebianMirror> Filtered;
-    Filtered.reserve(Mirrors.size());
-    std::string TargetCountry = dmt::countryCodeToName(Location);
+filterMirrors(const std::vector<DebianMirror> &mirrors, bool excludeOfficials,
+              bool onlyOfficials, const std::string &mirrorLocation) {
+    std::vector<DebianMirror> filtered;
+    filtered.reserve(mirrors.size());
+    std::string targetCountry = CountryCodes::getName(mirrorLocation);
 
-    for (const auto &Mirror : Mirrors) {
-        bool IsOfficial =
+    for (const auto &Mirror : mirrors) {
+        bool isOfficial =
             dm_url(Mirror).find("debian.org") != std::string::npos;
-        bool MatchesLocation =
-            Location.empty() || dm_country(Mirror) == TargetCountry;
+        bool matchesLocation =
+            mirrorLocation.empty() || dm_country(Mirror) == targetCountry;
 
-        if (!MatchesLocation)
+        if (!matchesLocation)
             continue;
 
-        if (OnlyOfficial && IsOfficial)
-            Filtered.push_back(Mirror);
-        else if (ExcludeOfficial && !IsOfficial)
-            Filtered.push_back(Mirror);
-        else if (!ExcludeOfficial && !OnlyOfficial)
-            Filtered.push_back(Mirror);
+        if (onlyOfficials && isOfficial)
+            filtered.push_back(Mirror);
+        else if (excludeOfficials && !isOfficial)
+            filtered.push_back(Mirror);
+        else if (!excludeOfficials && !onlyOfficials)
+            filtered.push_back(Mirror);
     }
 
-    return Filtered;
+    return filtered;
 }
 
 // Main entry point: parse args, fetch mirrors, run tests.
 // Returns 0 on success, non-zero on failure.
 int main(int argc, char *argv[]) {
     // Setup default arguments
-    std::string Location;
-    bool CountrySpecified = false;
-    bool ExcludeOfficial = false;
-    bool OnlyOfficial = false;
-    bool LoneStandingServer = false;
-    long TopCount = 5L; // default number of "Top" results to display
+    std::string location;
+    bool countrySpecified = false;
+    bool excludeOfficials = false;
+    bool officialsOnly = false;
+    bool loneStandingServer = false;
+    long topCount = 5L; // default number of "Top" results to display
 
     // Check argument size before parsing
     if (argc < 0)
@@ -137,193 +137,193 @@ int main(int argc, char *argv[]) {
 
     // Parse command-line arguments
     for (int i = 1; i < argc; ++i) {
-        std::string Arg = argv[i];
-        if (Arg == "--country" && i + 1 < argc) {
-            CountrySpecified = true;
-            Location = dmt::normalizeCountryCode(argv[++i]);
-        } else if (Arg == "--no-official-mirrors") {
-            ExcludeOfficial = true;
-        } else if (Arg == "--only-official-mirrors") {
-            OnlyOfficial = true;
-        } else if (Arg == "--count" && i + 1 < argc) {
+        std::string cmdLineArg = argv[i];
+        if (cmdLineArg == "--country" && i + 1 < argc) {
+            countrySpecified = true;
+            location = CountryCodes::normalize(argv[++i]);
+        } else if (cmdLineArg == "--no-official-mirrors") {
+            excludeOfficials = true;
+        } else if (cmdLineArg == "--only-official-mirrors") {
+            officialsOnly = true;
+        } else if (cmdLineArg == "--count" && i + 1 < argc) {
             // We'll clamp this later after fetching mirrors. So for now, just
             // parse/validate.
             const char *countValueString = argv[++i];
-            TopCount = myStoi("--count", countValueString);
-        } else if (Arg == "--help") {
+            topCount = myStoi("--count", countValueString);
+        } else if (cmdLineArg == "--help") {
             printHelp();
-        } else if (Arg == "--timeout" && i + 1 < argc) {
+        } else if (cmdLineArg == "--timeout" && i + 1 < argc) {
             const char *timeoutValueString = argv[++i];
-            long TimeoutArgs = myStoi("--timeout", timeoutValueString);
+            long timeoutArgs = myStoi("--timeout", timeoutValueString);
 
-            if (TimeoutArgs == kDisabledFlag) {
+            if (timeoutArgs == OPTION_DISABLED) {
                 std::cout << "Request timeouts are disabled.\n";
-                PerformanceTester::RequestTimeoutMs.store(kDisabledFlag);
+                PerformanceTester::RequestTimeoutMs.store(OPTION_DISABLED);
                 continue;
-            } else if (TimeoutArgs < 1000L) {
+            } else if (timeoutArgs < 1000L) {
                 std::cerr << "\nWARNING: a timeout of less than 1 second is "
                              "not recommended.\n"
                           << "As a reminder, --timeout takes a time value "
                              "measured in milliseconds.\n"
                           << "Did you definitely mean to run the program with "
                              "such a short timeout? (y/n): ";
-                char Response;
-                std::cin >> Response;
-                if (Response != 'y' && Response != 'Y')
+                char userResponse;
+                std::cin >> userResponse;
+                if (userResponse != 'y' && userResponse != 'Y')
                     std::exit(EXIT_FAILURE);
                 std::cerr << "\n";
-            } else if (TimeoutArgs < 3000L) {
+            } else if (timeoutArgs < 3000L) {
                 std::cout << "Note: A timeout of less than 3 seconds may lead "
                              "to many mirrors being marked as unreachable.\n";
             } else {
-                const float TimeoutSeconds =
-                    static_cast<float>(TimeoutArgs) / 1000.0f;
-                std::cout << "Using timeout value of " << TimeoutSeconds
-                          << " seconds (" << TimeoutArgs << " ms)\n";
+                const float timeoutSeconds =
+                    static_cast<float>(timeoutArgs) / 1000.0f;
+                std::cout << "Using timeout value of " << timeoutSeconds
+                          << " seconds (" << timeoutArgs << " ms)\n";
             }
             PerformanceTester::RequestTimeoutMs.store(
-                static_cast<long>(TimeoutArgs));
+                static_cast<long>(timeoutArgs));
         } else {
-            std::cerr << "Error: Unknown option '" << Arg << "'\n";
+            std::cerr << "Error: Unknown option '" << cmdLineArg << "'\n";
             return 1;
         }
     }
 
     // Validate that --country was given a valid code
-    if (CountrySpecified && Location.empty()) {
+    if (countrySpecified && location.empty()) {
         std::cerr << "Error: --country requires a valid ISO 3166-1 alpha-2 "
                      "country code\n";
         return 1;
     }
 
     // Validate country code
-    if (!Location.empty()) {
-        std::string TargetCountry = dmt::countryCodeToName(Location);
-        if (TargetCountry.empty()) {
-            std::cerr << "Error: Invalid country code '" << Location << "'\n";
+    if (!location.empty()) {
+        std::string invalidCountry = CountryCodes::getName(location);
+        if (invalidCountry.empty()) {
+            std::cerr << "Error: Invalid country code '" << location << "'\n";
             return 1;
         }
     }
 
     // If only-official-mirrors is specified, use predefined official mirrors to
     // avoid a web fetch
-    std::vector<DebianMirror> Mirrors;
-    if (OnlyOfficial) {
-        if (!Location.empty()) {
-            std::string TargetCountry = dmt::countryCodeToName(Location);
-            if (!TargetCountry.empty()) {
-                std::cout << "Using official mirrors for " << TargetCountry
+    std::vector<DebianMirror> debianMirrorList;
+    if (officialsOnly) {
+        if (!location.empty()) {
+            std::string officialsCountry = CountryCodes::getName(location);
+            if (!officialsCountry.empty()) {
+                std::cout << "Using official mirrors for " << officialsCountry
                           << "...\n";
-                Mirrors = MirrorFetcher::getOfficialMirrors(TargetCountry);
+                debianMirrorList = MirrorFetcher::getOfficialMirrors(officialsCountry);
             }
         } else {
             std::cout << "Using all official Debian mirrors...\n";
-            Mirrors = MirrorFetcher::getOfficialMirrors();
+            debianMirrorList = MirrorFetcher::getOfficialMirrors();
         }
     } else {
         std::cout << "Fetching mirror list...\n";
-        Mirrors = MirrorFetcher::fetchMirrors();
+        debianMirrorList = MirrorFetcher::fetchMirrors();
     }
 
-    if (Mirrors.empty()) {
+    if (debianMirrorList.empty()) {
         std::cerr << "Error: Failed to fetch mirrors\n";
         return 1;
     }
 
-    if (Mirrors.size() == 1) {
+    if (debianMirrorList.size() == 1) {
         std::cout << "It looks like there's only a single mirror available.\n";
-        LoneStandingServer = true;
+        loneStandingServer = true;
     } else {
-        std::cout << "Fetched " << Mirrors.size() << " mirrors.\n";
+        std::cout << "Fetched " << debianMirrorList.size() << " mirrors.\n";
     }
 
     // Apply filtering only if we fetched from the web (not using predefined
     // official mirrors)
-    if (!OnlyOfficial) {
-        Mirrors =
-            filterMirrors(Mirrors, ExcludeOfficial, OnlyOfficial, Location);
-        if (CountrySpecified || ExcludeOfficial)
-            std::cout << "After filtering: " << Mirrors.size() << " mirrors.\n";
+    if (!officialsOnly) {
+        debianMirrorList =
+            filterMirrors(debianMirrorList, excludeOfficials, officialsOnly, location);
+        if (countrySpecified || excludeOfficials)
+            std::cout << "After filtering: " << debianMirrorList.size() << " mirrors.\n";
     }
 
-    // Now that we know how many mirrors we have, ensure TopCount is not some
+    // Now that we know how many mirrors we have, ensure topCount is not some
     // larger value. If we got the disabled flag, then internally that really
     // just means to set this value to match whatever the number of mirrors we
     // tested in total.
-    if (TopCount == kDisabledFlag ||
-        static_cast<size_t>(TopCount) > Mirrors.size())
-        TopCount = static_cast<long>(Mirrors.size());
+    if (topCount == OPTION_DISABLED ||
+        static_cast<size_t>(topCount) > debianMirrorList.size())
+        topCount = static_cast<long>(debianMirrorList.size());
 
-    const auto StartTime = std::chrono::steady_clock::now();
-    auto Results = PerformanceTester::testAllMirrors(Mirrors);
-    const auto EndTime = std::chrono::steady_clock::now();
-    const auto Duration =
-        std::chrono::duration_cast<std::chrono::seconds>(EndTime - StartTime);
-    std::cout << "\nTesting complete. Took " << Duration.count()
+    const auto timerStartPoint = std::chrono::steady_clock::now();
+    auto mirrorResults = PerformanceTester::testAllMirrors(debianMirrorList);
+    const auto timerEndPoint = std::chrono::steady_clock::now();
+    const auto timerDuration =
+        std::chrono::duration_cast<std::chrono::seconds>(timerEndPoint - timerStartPoint);
+    std::cout << "\nTesting complete. Took " << timerDuration.count()
               << " seconds.\n";
 
     // If we only had a single server,
     // there is no need to continue past this point.
-    if (LoneStandingServer) {
+    if (loneStandingServer) {
         return 0;
     }
 
-    int Reachable = 0;
-    double AverageNetworkDelay = 0.0;
-    double AverageSpeed = 0.0;
+    int reachableCount = 0;
+    double averageNetworkDelay = 0.0;
+    double averageSpeed = 0.0;
 
-    for (const auto &Result : Results) {
+    for (const auto &Result : mirrorResults) {
         if (Result.IsReachable) {
-            Reachable++;
-            AverageNetworkDelay += Result.TransferDelayMs;
-            AverageSpeed += Result.DownloadSpeedMbps;
+            reachableCount++;
+            averageNetworkDelay += Result.transferDelayMs;
+            averageSpeed += Result.downloadSpeedMbps;
         }
     }
 
-    const float PercentReachable =
-        (Results.size() > 0) ? (static_cast<float>(Reachable) /
-                                static_cast<float>(Results.size()) * 100.0f)
+    const float percentReachable =
+        (mirrorResults.size() > 0) ? (static_cast<float>(reachableCount) /
+                                static_cast<float>(mirrorResults.size()) * 100.0f)
                              : 0.0f;
 
     std::cout << "\n" << std::string(100, '=') << "\n\n";
     std::cout << "Summary:\n";
-    std::cout << "  Total mirrors tested: " << Results.size() << "\n";
-    std::cout << "  Reachable mirrors: " << Reachable << " ("
-              << PercentReachable << "%)\n";
+    std::cout << "  Total mirrors tested: " << mirrorResults.size() << "\n";
+    std::cout << "  Reachable mirrors: " << reachableCount << " ("
+              << percentReachable << "%)\n";
     std::cout << "  Unreachable mirrors: "
-              << (Results.size() - static_cast<size_t>(Reachable)) << " ("
-              << (100.0f - PercentReachable) << "%)\n";
+              << (mirrorResults.size() - static_cast<size_t>(reachableCount)) << " ("
+              << (100.0f - percentReachable) << "%)\n";
 
-    if (Reachable > 0) {
-        const float AvgDelayInSeconds =
-            (static_cast<float>(AverageNetworkDelay) /
-             static_cast<float>(Reachable)) /
+    if (reachableCount > 0) {
+        const float avgDelayInSeconds =
+            (static_cast<float>(averageNetworkDelay) /
+             static_cast<float>(reachableCount)) /
             1000.0f;
         std::cout << "\n  Average time to start transfer: " << std::fixed
-                  << std::setprecision(2) << AvgDelayInSeconds << " seconds\n";
+                  << std::setprecision(2) << avgDelayInSeconds << " seconds\n";
         std::cout << "  Average speed: " << std::fixed << std::setprecision(2)
-                  << (AverageSpeed / Reachable) << " Mbps\n";
+                  << (averageSpeed / reachableCount) << " Mbps\n";
 
-        std::vector<PerformanceResult> ReachableResults;
-        for (const auto &Result : Results) {
-            if (Result.IsReachable)
-                ReachableResults.push_back(Result);
+        std::vector<PerformanceResult> reachableResults;
+        for (const auto &mirrorTestResult : mirrorResults) {
+            if (mirrorTestResult.IsReachable)
+                reachableResults.push_back(mirrorTestResult);
         }
 
-        const size_t DisplayCount =
-            std::min(static_cast<size_t>(TopCount), ReachableResults.size());
+        const size_t displayCount =
+            std::min(static_cast<size_t>(topCount), reachableResults.size());
 
-        std::cout << "\n  Top " << DisplayCount
+        std::cout << "\n  Top " << displayCount
                   << " ranked by time to start transfer:\n";
-        printTopResults(std::cout, ReachableResults,
-                        static_cast<int>(DisplayCount), compareByLatency,
-                        &PerformanceResult::TransferDelayMs, " ms");
+        printTopResults(std::cout, reachableResults,
+                        static_cast<int>(displayCount), compareByLatency,
+                        &PerformanceResult::transferDelayMs, " ms");
 
-        std::cout << "\n  Top " << DisplayCount
+        std::cout << "\n  Top " << displayCount
                   << " ranked by overall download speed:\n";
-        printTopResults(std::cout, ReachableResults,
-                        static_cast<int>(DisplayCount), compareBySpeed,
-                        &PerformanceResult::DownloadSpeedMbps, " Mbps");
+        printTopResults(std::cout, reachableResults,
+                        static_cast<int>(displayCount), compareBySpeed,
+                        &PerformanceResult::downloadSpeedMbps, " Mbps");
     }
 
     std::cout << "\n";

@@ -23,7 +23,7 @@ static std::string CURLcodeToString(CURLcode Res, long TimeoutMs = 0) {
     if (Res == CURLE_COULDNT_RESOLVE_HOST)
         return "DNS resolution failed";
     if (Res == CURLE_OPERATION_TIMEDOUT) {
-        if (TimeoutMs != kDisabledFlag)
+        if (TimeoutMs != OPTION_DISABLED)
             return "Timeout (" + std::to_string(TimeoutMs) + " ms)";
         return "Our connection timed out";
     }
@@ -50,7 +50,7 @@ double PerformanceTester::measureLatencyMs(const std::string &Url,
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     const long TimeoutMs =
         static_cast<long>(PerformanceTester::RequestTimeoutMs.load());
-    if (TimeoutMs != kDisabledFlag) {
+    if (TimeoutMs != OPTION_DISABLED) {
         curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS,
                          TimeoutMs); // overall timeout
         const long ConnectTimeoutMs = std::max(100L, TimeoutMs / 2);
@@ -107,7 +107,7 @@ double PerformanceTester::measureDownloadSpeedMbps(const std::string &Url,
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, discardCallback);
     const long TimeoutMs =
         static_cast<long>(PerformanceTester::RequestTimeoutMs.load());
-    if (TimeoutMs != kDisabledFlag)
+    if (TimeoutMs != OPTION_DISABLED)
         curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, TimeoutMs);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
@@ -170,12 +170,12 @@ PerformanceResult PerformanceTester::testMirror(const DebianMirror &Mirror) {
 
     try {
         std::string LatencyError;
-        result.TransferDelayMs = measureLatencyMs(dm_url(Mirror), LatencyError);
-        if ((result.TransferDelayMs) < 0) {
+        result.transferDelayMs = measureLatencyMs(dm_url(Mirror), LatencyError);
+        if ((result.transferDelayMs) < 0) {
             result.IsReachable = false;
             result.ErrorMessage = (LatencyError.empty() ? "Latency check failed"
                                                         : LatencyError.c_str());
-            result.DownloadSpeedMbps = 0.0;
+            result.downloadSpeedMbps = 0.0;
             std::cout << " - FAILED ("
                       << (LatencyError.empty() ? "Latency check failed"
                                                : LatencyError.c_str())
@@ -185,13 +185,13 @@ PerformanceResult PerformanceTester::testMirror(const DebianMirror &Mirror) {
         }
 
         std::string SpeedError;
-        result.DownloadSpeedMbps =
+        result.downloadSpeedMbps =
             measureDownloadSpeedMbps(dm_url(Mirror), SpeedError);
-        if ((result.DownloadSpeedMbps) < 0) {
+        if ((result.downloadSpeedMbps) < 0) {
             result.IsReachable = false;
             result.ErrorMessage = (SpeedError.empty() ? "Download test failed"
                                                       : SpeedError.c_str());
-            result.DownloadSpeedMbps = 0.0;
+            result.downloadSpeedMbps = 0.0;
             std::cout << " - FAILED ("
                       << (SpeedError.empty() ? "Download test failed"
                                              : SpeedError.c_str())
@@ -200,20 +200,20 @@ PerformanceResult PerformanceTester::testMirror(const DebianMirror &Mirror) {
                 return result;
         }
 
-        if (result.IsReachable && result.DownloadSpeedMbps >= 0) {
+        if (result.IsReachable && result.downloadSpeedMbps >= 0) {
             std::cout << " - Delay: " << std::fixed << std::setprecision(2)
-                      << result.TransferDelayMs << "ms, Speed: ";
-            if (result.DownloadSpeedMbps < 1.0)
+                      << result.transferDelayMs << "ms, Speed: ";
+            if (result.downloadSpeedMbps < 1.0)
                 std::cout << std::fixed << std::setprecision(2)
-                          << (result.DownloadSpeedMbps * 1000.0) << " Kbps\n";
+                          << (result.downloadSpeedMbps * 1000.0) << " Kbps\n";
             else
                 std::cout << std::fixed << std::setprecision(2)
-                          << result.DownloadSpeedMbps << " Mbps\n";
+                          << result.downloadSpeedMbps << " Mbps\n";
         }
     } catch (const std::exception &e) {
         result.IsReachable = false;
         result.ErrorMessage = e.what();
-        result.DownloadSpeedMbps = 0.0;
+        result.downloadSpeedMbps = 0.0;
         std::cout << " - FAILED (" << e.what() << ")\n";
     }
 

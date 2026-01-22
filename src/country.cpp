@@ -4,22 +4,99 @@
 #include "mirror_fetcher.hpp"
 #include <cctype>
 
-namespace dmt {
+const std::array<CountryCode, 80> CountryCodeList = {{{"Argentina", "AR"},
+                                                   {"Australia", "AU"},
+                                                   {"Austria", "AT"},
+                                                   {"Azerbaijan", "AZ"},
+                                                   {"Bangladesh", "BD"},
+                                                   {"Belarus", "BY"},
+                                                   {"Belgium", "BE"},
+                                                   {"Brazil", "BR"},
+                                                   {"Bulgaria", "BG"},
+                                                   {"Burkina Faso", "BF"},
+                                                   {"Canada", "CA"},
+                                                   {"Chile", "CL"},
+                                                   {"China", "CN"},
+                                                   {"Colombia", "CO"},
+                                                   {"Costa Rica", "CR"},
+                                                   {"Croatia", "HR"},
+                                                   {"Czech Republic", "CZ"},
+                                                   {"Denmark", "DK"},
+                                                   {"Dominican Republic", "DO"},
+                                                   {"Ecuador", "EC"},
+                                                   {"Finland", "FI"},
+                                                   {"France", "FR"},
+                                                   {"Germany", "DE"},
+                                                   {"Greece", "GR"},
+                                                   {"Hong Kong", "HK"},
+                                                   {"Hungary", "HU"},
+                                                   {"Iceland", "IS"},
+                                                   {"India", "IN"},
+                                                   {"Indonesia", "ID"},
+                                                   {"Iran", "IR"},
+                                                   {"Ireland", "IE"},
+                                                   {"Israel", "IL"},
+                                                   {"Italy", "IT"},
+                                                   {"Japan", "JP"},
+                                                   {"Kazakhstan", "KZ"},
+                                                   {"Kenya", "KE"},
+                                                   {"Latvia", "LV"},
+                                                   {"Lithuania", "LT"},
+                                                   {"Luxembourg", "LU"},
+                                                   {"Malaysia", "MY"},
+                                                   {"Mexico", "MX"},
+                                                   {"Morocco", "MA"},
+                                                   {"Netherlands", "NL"},
+                                                   {"New Caledonia", "NC"},
+                                                   {"New Zealand", "NZ"},
+                                                   {"Nicaragua", "NI"},
+                                                   {"Norway", "NO"},
+                                                   {"Pakistan", "PK"},
+                                                   {"Panama", "PA"},
+                                                   {"Paraguay", "PY"},
+                                                   {"Peru", "PE"},
+                                                   {"Philippines", "PH"},
+                                                   {"Poland", "PL"},
+                                                   {"Portugal", "PT"},
+                                                   {"Romania", "RO"},
+                                                   {"Russia", "RU"},
+                                                   {"Saudi Arabia", "SA"},
+                                                   {"Serbia", "RS"},
+                                                   {"Singapore", "SG"},
+                                                   {"Slovakia", "SK"},
+                                                   {"Slovenia", "SI"},
+                                                   {"South Africa", "ZA"},
+                                                   {"South Korea", "KR"},
+                                                   {"Spain", "ES"},
+                                                   {"Sri Lanka", "LK"},
+                                                   {"Sweden", "SE"},
+                                                   {"Switzerland", "CH"},
+                                                   {"Taiwan", "TW"},
+                                                   {"Thailand", "TH"},
+                                                   {"Turkey", "TR"},
+                                                   {"Ukraine", "UA"},
+                                                   {"United Kingdom", "GB"},
+                                                   {"United States", "US"},
+                                                   {"Uruguay", "UY"},
+                                                   {"Venezuela", "VE"},
+                                                   {"Vietnam", "VN"}}};
+
+namespace CountryCodes {
 namespace {
 // Expected length (in characters) for ISO 3166-1 alpha-2 country codes.
-constexpr size_t CountryCodeLengthLimit = 2;
+constexpr size_t ISO_ALPHA2_SIZE = 2;
 } // namespace
 
 // Input: raw country code (any case).
 // Output: normalized country code (uppercase), or empty string if invalid.
-std::string normalizeCountryCode(std::string_view raw) {
-    if (raw.size() < CountryCodeLengthLimit)
+std::string normalize(std::string_view raw) {
+    if (raw.size() < ISO_ALPHA2_SIZE)
         return "";
 
     std::string out;
-    out.reserve(CountryCodeLengthLimit);
+    out.reserve(ISO_ALPHA2_SIZE);
 
-    for (size_t i = 0; i < CountryCodeLengthLimit; ++i) {
+    for (size_t i = 0; i < ISO_ALPHA2_SIZE; ++i) {
         unsigned char uc = static_cast<unsigned char>(raw[i]);
         if (!std::isalpha(uc))
             return "";
@@ -31,25 +108,25 @@ std::string normalizeCountryCode(std::string_view raw) {
 
 // Input: country code (ISO 3166-1 alpha-2, uppercase or lowercase).
 // Output: country name, or empty string if not found.
-std::string countryCodeToName(std::string_view code) {
-    if (code.size() != CountryCodeLengthLimit)
+std::string getName(std::string_view code) {
+    if (code.size() != ISO_ALPHA2_SIZE)
         return "";
 
     std::string codeUpper;
-    codeUpper.reserve(CountryCodeLengthLimit);
+    codeUpper.reserve(ISO_ALPHA2_SIZE);
 
-    for (size_t i = 0; i < CountryCodeLengthLimit; ++i) {
+    for (size_t i = 0; i < ISO_ALPHA2_SIZE; ++i) {
         unsigned char uc = static_cast<unsigned char>(code[i]);
         if (!std::isalpha(uc))
             return "";
         codeUpper.push_back(static_cast<char>(std::toupper(uc)));
     }
 
-    for (const auto &entry : CountryCodes) {
+    for (const auto &entry : CountryCodeList) {
         if (cc_code(entry) == codeUpper)
             return std::string(cc_name(entry));
     }
 
     return "";
 }
-} // namespace dmt
+} // namespace CountryCodes

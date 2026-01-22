@@ -18,6 +18,3 @@ class MirrorFetcher {
                                 std::string *UserStringPtr);
     static std::string extractHostname(std::string_view Url);
 };
-
-extern const std::array<CountryCode, 80> CountryCodes;
-extern const std::array<OfficialMirror, 35> OfficialMirrors;

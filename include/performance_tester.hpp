@@ -7,12 +7,12 @@
 #include <vector>
 
 // Used in various places to represent disabled timeouts/unlimited counts.
-constexpr long kDisabledFlag = -1L;
+constexpr long OPTION_DISABLED = -1L;
 
 struct PerformanceResult {
     DebianMirror Mirror;
-    double TransferDelayMs;
-    double DownloadSpeedMbps;
+    double transferDelayMs;
+    double downloadSpeedMbps;
     bool IsReachable;
     std::string ErrorMessage;
 };

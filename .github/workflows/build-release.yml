@@ -1,6 +1,3 @@
-# Provide a trusted build of DMT as efficiently and quickly as possible.
-# I'm trying to minimize energy usage / environmental impact, so I'm only building for x86_64 Linux for now.
-
 name: DMT workflow auto-release
 
 on:
@@ -16,7 +13,18 @@ permissions:
 jobs:
   build_and_release:
     name: Build & Release!
-    runs-on: ubuntu-slim
+
+    strategy:
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-24.04
+            pkg_arch: amd64
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+            pkg_arch: arm64
+
+    runs-on: ${{ matrix.runner }}
 
     steps:
       - name: Checkout
@@ -53,18 +61,28 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends build-essential cmake libcurl4-openssl-dev gh
 
-      - name: Build x86_64 Linux .deb package
+      - name: Build ${{ matrix.arch }} Linux .deb package
         run: |
-          mkdir -p build/x86_64 artifacts
-          cd build/x86_64
-          cmake -DCMAKE_BUILD_TYPE=Release -DWITH_CPACK=ON -DDMT_VERSION="$VERSION" -DCPACK_PACKAGE_VERSION="$VERSION" -DCMAKE_SYSTEM_PROCESSOR=x86_64 ../..
+          mkdir -p build/${{ matrix.arch }} artifacts
+          cd build/${{ matrix.arch }}
+          cmake -DCMAKE_BUILD_TYPE=Release -DWITH_CPACK=ON -DDMT_VERSION="$VERSION" -DCPACK_PACKAGE_VERSION="$VERSION" -DCMAKE_SYSTEM_PROCESSOR=${{ matrix.arch }} ../..
           cmake --build . --config Release
-          cpack -G DEB -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="$(dpkg --print-architecture)"
+          cpack -G DEB -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE=${{ matrix.pkg_arch }}
           DEB_FILE=$(ls -1 *.deb | head -n 1)
-          mv "$DEB_FILE" "../../artifacts/dmt-linux-x86_64-${VERSION}.deb"
+          mv "$DEB_FILE" "../../artifacts/dmt-linux-${{ matrix.arch }}-${VERSION}.deb"
 
       - name: Create GitHub Release and upload assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "v$VERSION" artifacts/*.deb --title "Release v$VERSION" --target "$GITHUB_SHA"
+          set -euo pipefail
+          TAG="v$VERSION"
+          TITLE="Release v$VERSION"
+
+          # Create once, otherwise upload into the existing release. --clobber lets later runners replace same-named assets.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" artifacts/*.deb --clobber
+          else
+            gh release create "$TAG" artifacts/*.deb --title "$TITLE" --target "$GITHUB_SHA" \
+              || gh release upload "$TAG" artifacts/*.deb --clobber
+          fi

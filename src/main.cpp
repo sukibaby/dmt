@@ -209,8 +209,7 @@ int main(int argc, char *argv[])
             }
             else if (TimeoutArgs == std::numeric_limits<int>::max())
             {
-                // fun fact - INT_MAX is 2147483647, which is about 3.5 weeks. i wonder if curl will try to wait that long...
-                std::cout << "Request timeouts are disabled.\n";
+                // silently continue in this case
             }
             else
             {

@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-// Used in various places to represent disabled timeouts/unlimited counts.
+// Used for handling the --count and --timeout options.
 constexpr long OPTION_DISABLED = -1L;
 
 struct PerformanceResult {

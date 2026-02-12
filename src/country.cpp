@@ -1,10 +1,11 @@
-// Various tools for parsing/handling country codes and names.
-
 #include "country.hpp"
 #include "mirror_fetcher.hpp"
 #include <cctype>
 
-const std::array<CountryCode, 80> CountryCodeList = {{{"Argentina", "AR"},
+namespace CountryCodes {
+// Expected length (in characters) for ISO 3166-1 alpha-2 country codes.
+constexpr size_t ISO_ALPHA2_SIZE = 2;
+constexpr std::array<CountryCode, 80> CountryCodeList = {{{"Argentina", "AR"},
                                                    {"Australia", "AU"},
                                                    {"Austria", "AT"},
                                                    {"Azerbaijan", "AZ"},
@@ -81,14 +82,9 @@ const std::array<CountryCode, 80> CountryCodeList = {{{"Argentina", "AR"},
                                                    {"Venezuela", "VE"},
                                                    {"Vietnam", "VN"}}};
 
-namespace CountryCodes {
-namespace {
-// Expected length (in characters) for ISO 3166-1 alpha-2 country codes.
-constexpr size_t ISO_ALPHA2_SIZE = 2;
-} // namespace
-
 // Input: raw country code (any case).
-// Output: normalized country code (uppercase), or empty string if invalid.
+// Output: uppercase, two-character country code.
+// Returns an empty string if invalid.
 std::string normalize(std::string_view raw) {
     if (raw.size() < ISO_ALPHA2_SIZE)
         return "";
@@ -107,7 +103,8 @@ std::string normalize(std::string_view raw) {
 }
 
 // Input: country code (ISO 3166-1 alpha-2, uppercase or lowercase).
-// Output: country name, or empty string if not found.
+// Output: Full country name as a string.
+// Returns an empty string if no match is found.
 std::string getName(std::string_view code) {
     if (code.size() != ISO_ALPHA2_SIZE)
         return "";
@@ -122,7 +119,7 @@ std::string getName(std::string_view code) {
         codeUpper.push_back(static_cast<char>(std::toupper(uc)));
     }
 
-    for (const auto &entry : CountryCodeList) {
+    for (const auto &entry : CountryCodes::CountryCodeList) {
         if (cc_code(entry) == codeUpper)
             return std::string(cc_name(entry));
     }

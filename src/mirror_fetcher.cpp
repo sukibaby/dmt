@@ -43,7 +43,7 @@ std::vector<DebianMirror> MirrorFetcher::fetchMirrors() {
 
         FetchResponse = curl_easy_perform(Curl);
         if (FetchResponse == CURLE_OK) {
-            std::cout << "Successfully fetched mirrors from: " << Urls[Idx]
+            std::cout << " - Successfully fetched mirrors from: " << Urls[Idx]
                       << "\n";
             curl_easy_cleanup(Curl);
             return parseHtmlMirrorList(Response);
@@ -145,25 +145,7 @@ std::string MirrorFetcher::extractHostname(std::string_view Url) {
     return std::string(Url.substr(Start, End - Start));
 }
 
-// Return a vector containing official mirrors.
-// If CountryName is provided, returns mirrors for that country only.
-// If CountryName is empty, returns all official mirrors.
-std::vector<DebianMirror>
-MirrorFetcher::getOfficialMirrors(std::string_view CountryName) {
-    std::vector<DebianMirror> Mirrors;
-
-    for (const auto &official : OfficialMirrors) {
-        if (CountryName.empty() || om_country(official) == CountryName)
-            Mirrors.push_back({std::string(om_url(official)),
-                               std::string(om_country(official))});
-    }
-
-    return Mirrors;
-}
-
-namespace {
-// these urls are static and do not need to be fetched from the web.
-const std::array<OfficialMirror, 35> OfficialMirrors = {
+constexpr std::array<OfficialMirror, 35> OfficialMirrors = {
     {{"Australia", "ftp://ftp.au.debian.org/debian/"},
      {"Austria", "ftp://ftp.at.debian.org/debian/"},
      {"Belgium", "ftp://ftp.be.debian.org/debian/"},
@@ -199,4 +181,19 @@ const std::array<OfficialMirror, 35> OfficialMirrors = {
      {"Taiwan", "ftp://ftp.tw.debian.org/debian/"},
      {"United Kingdom", "ftp://ftp.uk.debian.org/debian/"},
      {"United States", "ftp://ftp.us.debian.org/debian/"}}};
-} // namespace
+
+// Return a vector containing official mirrors.
+// If CountryName is provided, returns mirrors for that country only.
+// If CountryName is empty, returns all official mirrors.
+std::vector<DebianMirror>
+MirrorFetcher::getOfficialMirrors(std::string_view CountryName) {
+    std::vector<DebianMirror> Mirrors;
+
+    for (const auto &official : OfficialMirrors) {
+        if (CountryName.empty() || om_country(official) == CountryName)
+            Mirrors.push_back({std::string(om_url(official)),
+                               std::string(om_country(official))});
+    }
+
+    return Mirrors;
+}

@@ -23,30 +23,40 @@ bool compareBySpeed(const PerformanceResult &A, const PerformanceResult &B) {
     return A.downloadSpeedMbps > B.downloadSpeedMbps;
 }
 
-long myStoi(const char *flag, const char *inputStr) {
-    long long ret;
+long safeStringToLong(const char *flag, const char *inputStr) {
+    long long parsedValue = -1;
+
+    if (strcmp(inputStr, "none") == 0) {
+        return OPTION_DISABLED;
+    }
+
     auto [endPointer, errorCode] =
-        std::from_chars(inputStr, inputStr + std::strlen(inputStr), ret);
+        std::from_chars(inputStr, inputStr + std::strlen(inputStr), parsedValue);
+
+    if (parsedValue == -1) {
+        std::cerr << "Error when assigning value for " << flag << "\n";
+        std::exit(EXIT_FAILURE);
+    }
 
     // Assuming the user intentionally meant "as large as possible" as a way to
     // disable timeouts / ranking cutoffs. We need to check out_of_range first
     // for consistency between compilers.
     if (errorCode == std::errc::result_out_of_range ||
-        ret >= (long long)std::numeric_limits<long>::max()) {
+        parsedValue >= (long long)std::numeric_limits<long>::max()) {
         return OPTION_DISABLED;
     }
 
-    if (errorCode == std::errc::invalid_argument || ret == 0) {
+    if (errorCode == std::errc::invalid_argument || parsedValue == 0) {
         std::cerr << "Error: " << flag << " value is out of range.\n";
         std::exit(EXIT_FAILURE);
     }
 
-    if (ret < 0) {
+    if (parsedValue < 0) {
         std::cerr << "Error: " << flag << " value cannot be negative.\n";
         std::exit(EXIT_FAILURE);
     }
 
-    return static_cast<long>(ret);
+    return static_cast<long>(parsedValue);
 }
 
 const std::vector<std::pair<const char *, const char *>> helpOptions = {
@@ -149,12 +159,12 @@ int main(int argc, char *argv[]) {
             // We'll clamp this later after fetching mirrors. So for now, just
             // parse/validate.
             const char *countValueString = argv[++i];
-            topCount = myStoi("--count", countValueString);
+            topCount = safeStringToLong("--count", countValueString);
         } else if (cmdLineArg == "--help") {
             printHelp();
         } else if (cmdLineArg == "--timeout" && i + 1 < argc) {
             const char *timeoutValueString = argv[++i];
-            long timeoutArgs = myStoi("--timeout", timeoutValueString);
+            long timeoutArgs = safeStringToLong("--timeout", timeoutValueString);
 
             if (timeoutArgs == OPTION_DISABLED) {
                 std::cout << "Request timeouts are disabled.\n";
@@ -221,7 +231,7 @@ int main(int argc, char *argv[]) {
             debianMirrorList = MirrorFetcher::getOfficialMirrors();
         }
     } else {
-        std::cout << "Fetching mirror list...\n";
+        std::cout << " - Fetching mirror list...\n";
         debianMirrorList = MirrorFetcher::fetchMirrors();
     }
 
@@ -234,7 +244,7 @@ int main(int argc, char *argv[]) {
         std::cout << "It looks like there's only a single mirror available.\n";
         loneStandingServer = true;
     } else {
-        std::cout << "Fetched " << debianMirrorList.size() << " mirrors.\n";
+        std::cout << " - Fetched " << debianMirrorList.size() << " mirrors.\n";
     }
 
     // Apply filtering only if we fetched from the web (not using predefined
@@ -243,7 +253,7 @@ int main(int argc, char *argv[]) {
         debianMirrorList =
             filterMirrors(debianMirrorList, excludeOfficials, officialsOnly, location);
         if (countrySpecified || excludeOfficials)
-            std::cout << "After filtering: " << debianMirrorList.size() << " mirrors.\n";
+            std::cout << " - After filtering: " << debianMirrorList.size() << " mirrors.\n";
     }
 
     // Now that we know how many mirrors we have, ensure topCount is not some
@@ -259,11 +269,10 @@ int main(int argc, char *argv[]) {
     const auto timerEndPoint = std::chrono::steady_clock::now();
     const auto timerDuration =
         std::chrono::duration_cast<std::chrono::seconds>(timerEndPoint - timerStartPoint);
-    std::cout << "\nTesting complete. Took " << timerDuration.count()
+    std::cout << "Testing complete. Took " << timerDuration.count()
               << " seconds.\n";
 
-    // If we only had a single server,
-    // there is no need to continue past this point.
+    // If we only had a single server, there is no need to continue past this point.
     if (loneStandingServer) {
         return 0;
     }

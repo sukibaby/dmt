@@ -28,14 +28,14 @@ Can be combined with
 to test official mirrors in a specific country.
 .TP
 .B \-\-count \fINUMBER\fR
-Number of top results to display for latency and speed rankings.
+Determines the amount of results to display for latency and speed rankings.
 Default is 5 results.
-To disable this option (display all results), provide a very large number.
+To disable limiting the number of results shown (in other words, to display all results), use `none`.
 .TP
 .B \-\-timeout \fIMILLISECONDS\fR
 Set the timeout for individual mirror requests, in milliseconds.
 Default is 60 seconds (60000 ms).
-To disable this option (wait indefinitely for a response), provide a very large number.
+To disable this option (wait indefinitely for a response), use `none`.
 .TP
 .B \-\-help
 Display the help message and exit.
@@ -48,17 +48,17 @@ Test only mirrors in France:
 .IP
 dmt \-\-country FR
 .PP
-Test only official Debian mirrors in Germany:
+Test only official Debian mirrors in Germany with a timeout of 5 seconds:
 .IP
-dmt \-\-only\-official\-mirrors \-\-country DE
+dmt \-\-only\-official\-mirrors \-\-country DE \-\-timeout 5000
 .PP
 Test community mirrors and show top 10 results:
 .IP
 dmt \-\-no\-official\-mirrors \-\-count 10
 .PP
-Test with a custom timeout of 5 seconds:
+Test with the auto-timeout feature disabled:
 .IP
-dmt \-\-timeout 5000
+dmt \-\-timeout none
 .SH AUTHOR
 sukibaby
 .SH SEE ALSO

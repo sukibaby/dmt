@@ -81,6 +81,9 @@ void printHelp() {
 }
 } // namespace
 
+// Helper for printing the sorted results after testing has been completed.
+// Uses the value from --count, if provided, to determine how many results to display.
+// Does not modify the source vector.
 template <typename T, typename Comparator, typename MetricT>
 void printTopResults(std::ostream &outputStream, const std::vector<T> &source,
                      int topCount, Comparator comp, MetricT T::*metricMember,
@@ -88,10 +91,10 @@ void printTopResults(std::ostream &outputStream, const std::vector<T> &source,
     std::vector<T> Temp = source;
     std::sort(Temp.begin(), Temp.end(), comp);
 
-    for (size_t Idx = 0;
-         Idx < static_cast<size_t>(topCount) && Idx < Temp.size(); ++Idx) {
-        const auto &Item = Temp[Idx];
-        outputStream << "    " << (Idx + 1) << ". " << dm_url(Item.Mirror) << " - "
+    for (size_t IIDX = 0;
+         IIDX < static_cast<size_t>(topCount) && IIDX < Temp.size(); ++IIDX) {
+        const auto &Item = Temp[IIDX];
+        outputStream << "    " << (IIDX + 1) << ". " << dm_url(Item.Mirror) << " - "
             << std::fixed << std::setprecision(2) << (Item.*metricMember)
             << metricUnit << "\n";
     }

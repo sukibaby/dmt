@@ -1,6 +1,3 @@
-# Provide a trusted build of DMT as efficiently and quickly as possible.
-# I'm trying to minimize energy usage / environmental impact, so I'm only building for x86_64 Linux for now.
-
 name: DMT workflow auto-release
 
 on:

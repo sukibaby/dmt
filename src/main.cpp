@@ -30,8 +30,8 @@ long safeStringToLong(const char *flag, const char *inputStr) {
         return OPTION_DISABLED;
     }
 
-    auto [endPointer, errorCode] =
-        std::from_chars(inputStr, inputStr + std::strlen(inputStr), parsedValue);
+    auto [endPointer, errorCode] = std::from_chars(
+        inputStr, inputStr + std::strlen(inputStr), parsedValue);
 
     if (parsedValue == -1) {
         std::cerr << "Error when assigning value for " << flag << "\n";
